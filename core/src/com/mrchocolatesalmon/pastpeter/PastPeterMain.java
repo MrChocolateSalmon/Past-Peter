@@ -1,0 +1,26 @@
+package com.mrchocolatesalmon.pastpeter;
+
+import com.badlogic.gdx.ApplicationAdapter;
+import com.badlogic.gdx.Game;
+import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.graphics.GL20;
+import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.mrchocolatesalmon.pastpeter.helpers.AssetLoader;
+import com.mrchocolatesalmon.pastpeter.helpers.InputHandler;
+import com.mrchocolatesalmon.pastpeter.screens.IntroScreen;
+
+public class PastPeterMain extends Game {
+
+	@Override
+	public void create () {
+
+		AssetLoader.load();
+		setScreen(new IntroScreen(this));
+	}
+	
+	@Override
+	public void dispose () {
+		AssetLoader.dispose();
+	}
+}
