@@ -4,20 +4,30 @@ import java.util.HashMap;
 
 public class ObjectDef {
 
-    public String[] tags;
+    public HashMap<String, Integer> parameters = new HashMap<String, Integer>();
 
     public HashMap<Integer, String> textureMap = new HashMap<Integer, String>();
 
     public ObjectDef(){
+        parameters.put("start_state", 1);
     }
 
-    public ObjectDef Tags(String[] tags){
-        this.tags = tags;
+    public ObjectDef Parameter(String name, int value){
+        parameters.put(name, value);
         return this;
     }
 
     public ObjectDef Animation(int state, String texName){
         textureMap.put(state, texName);
         return this;
+    }
+
+    public ObjectDef CloneObjectDef(){
+        ObjectDef c = new ObjectDef();
+
+        c.parameters = (HashMap<String, Integer>)parameters.clone();
+        c.textureMap = (HashMap<Integer, String>)textureMap.clone();
+
+        return c;
     }
 }

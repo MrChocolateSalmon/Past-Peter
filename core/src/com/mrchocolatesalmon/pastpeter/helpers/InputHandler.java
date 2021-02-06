@@ -11,6 +11,7 @@ public class InputHandler implements InputProcessor {
 
     public boolean anykeyDown = false;
     public boolean[] keysDown = new boolean[256];
+    public boolean[] keysPressed = new boolean[256];
 
     public boolean mouseDown = false;
 
@@ -24,9 +25,16 @@ public class InputHandler implements InputProcessor {
         currentScreen = newScreen;
     }
 
+    public void resetKeysPressed(){
+        for (int i = 0; i < keysPressed.length; i++){
+            keysPressed[i] = false;
+        }
+    }
+
     @Override
     public boolean keyDown(int keycode) {
         keysDown[keycode] = true;
+        keysPressed[keycode] = true;
         anykeyDown = true;
         return true;
     }

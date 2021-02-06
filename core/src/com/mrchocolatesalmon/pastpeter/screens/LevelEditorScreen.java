@@ -23,6 +23,8 @@ public class LevelEditorScreen implements Screen, ScreenMethods {
     @Override
     public void render(float delta) {
 
+
+        gameData.inputs.resetKeysPressed();
     }
 
     @Override

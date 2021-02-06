@@ -97,6 +97,8 @@ public class LevelSelectScreen implements Screen, ScreenMethods {
         }
 
         gameData.renderer.renderEnd();
+
+        gameData.inputs.resetKeysPressed();
     }
 
     @Override

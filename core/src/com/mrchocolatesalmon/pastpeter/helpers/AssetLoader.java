@@ -19,7 +19,7 @@ public class AssetLoader {
     private static HashMap<String, Animation> objectTextureMap;
 
     private static Texture peterTexture;
-    private static HashMap<String, TextureRegion> playerTextureMap;
+    private static HashMap<String, Animation> playerTextureMap;
 
     public static void load() {
 
@@ -80,6 +80,20 @@ public class AssetLoader {
         objectTextureMap.put("bird_fly", makeAnimation(objectTexture, 7, 4, 2, 0.4f, PlayMode.NORMAL));
     }
 
+    private static void loadPlayerAssets() {
+
+        //CAN WE MAKE THESE TEXTURES BIGGER? AND SCALE THEM DOWN?? yes...
+
+        playerTextureMap = new HashMap<String, Animation>();
+
+        peterTexture = new Texture(Gdx.files.internal("data/playertexture.png"));
+        peterTexture.setFilter(TextureFilter.Nearest, TextureFilter.Nearest);
+
+        playerTextureMap.put("peter_past_idle", makeAnimation(peterTexture, 0, 1, 1, 0.2f, PlayMode.LOOP));
+        playerTextureMap.put("peter_present_idle", makeAnimation(peterTexture, 1, 1, 1, 0.2f, PlayMode.LOOP));
+        playerTextureMap.put("peter_future_idle", makeAnimation(peterTexture, 2, 1, 1, 0.2f, PlayMode.LOOP));
+    }
+
     private static Animation makeAnimation(Texture tex, int y, int startX, int count, float speed, PlayMode playMode) {
 
         int texSize = 64;
@@ -87,7 +101,7 @@ public class AssetLoader {
         TextureRegion[] frames = new TextureRegion[count];
 
         for (int i = 0; i < count; i++) {
-            TextureRegion temp = new TextureRegion(objectTexture, (startX+i)*texSize, y*texSize, texSize, texSize);
+            TextureRegion temp = new TextureRegion(tex, (startX+i)*texSize, y*texSize, texSize, texSize);
             temp.flip(false, true);
 
             frames[i] = temp;
@@ -98,24 +112,11 @@ public class AssetLoader {
         return anim;
     }
 
-    private static void loadPlayerAssets() {
-
-        //CAN WE MAKE THESE TEXTURES BIGGER? AND SCALE THEM DOWN?? yes...
-
-        playerTextureMap = new HashMap<String, TextureRegion>();
-
-        peterTexture = new Texture(Gdx.files.internal("data/playertexture.png"));
-        peterTexture.setFilter(TextureFilter.Nearest, TextureFilter.Nearest);
-
-        TextureRegion peter1 = new TextureRegion(peterTexture, 0, 0, 32, 32);
-        playerTextureMap.put("peter_idle", peter1);
-    }
-
     public static Animation getIngameTexture(String key){
         return objectTextureMap.get(key);
     }
 
-    public static TextureRegion getPlayerTexture(String key){
+    public static Animation getPlayerTexture(String key){
         return playerTextureMap.get(key);
     }
 }

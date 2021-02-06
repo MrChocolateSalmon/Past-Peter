@@ -2,7 +2,9 @@ package com.mrchocolatesalmon.pastpeter.screens;
 
 import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.Input;
 import com.badlogic.gdx.Screen;
+import com.mrchocolatesalmon.pastpeter.enums.TimeID;
 import com.mrchocolatesalmon.pastpeter.gameworld.GameData;
 import com.mrchocolatesalmon.pastpeter.gameworld.Level;
 import com.mrchocolatesalmon.pastpeter.helpers.AssetLoader;
@@ -45,6 +47,15 @@ public class InGameScreen implements Screen, ScreenMethods {
 
     private void gameUpdate(){
 
+        if (gameData.inputs.keysPressed[Input.Keys.NUM_1]){
+            currentLevel.setCurrentTimeID(TimeID.past);
+        } else if (gameData.inputs.keysPressed[Input.Keys.NUM_2]){
+            currentLevel.setCurrentTimeID(TimeID.present);
+        } else if (gameData.inputs.keysPressed[Input.Keys.NUM_3]){
+            currentLevel.setCurrentTimeID(TimeID.future);
+        }
+
+        gameData.inputs.resetKeysPressed();
     }
 
     @Override

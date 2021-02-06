@@ -23,6 +23,14 @@ public class TimePosition {
         this.breathing = breathing;
     }
 
+    public void copyValues(TimePosition other){
+        x = other.x;
+        y = other.y;
+        aliveStatus = other.aliveStatus;
+        breathing = other.breathing;
+        holding = other.holding;
+    }
+
     public TimePosition Clone(){
         return new TimePosition(x, y, aliveStatus, breathing);
     }

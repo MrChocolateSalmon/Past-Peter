@@ -30,6 +30,8 @@ public class IntroScreen implements Screen, ScreenMethods {
 
         gameData.renderer.renderStart(0, delta, AssetLoader.bgPast);
         gameData.renderer.renderEnd();
+
+        gameData.inputs.resetKeysPressed();
     }
 
     @Override

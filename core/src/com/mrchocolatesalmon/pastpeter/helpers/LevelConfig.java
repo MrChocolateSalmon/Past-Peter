@@ -2,12 +2,15 @@ package com.mrchocolatesalmon.pastpeter.helpers;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.files.FileHandle;
-import com.badlogic.gdx.math.Vector3;
+import com.badlogic.gdx.math.Vector2;
+import com.mrchocolatesalmon.pastpeter.datastructures.ObjectDef;
 import com.mrchocolatesalmon.pastpeter.enums.BackgroundType;
+import com.mrchocolatesalmon.pastpeter.enums.PlayerID;
 import com.mrchocolatesalmon.pastpeter.enums.TimeID;
 import com.mrchocolatesalmon.pastpeter.gameobjects.IngameObject;
 import com.mrchocolatesalmon.pastpeter.gameworld.GameData;
 import com.mrchocolatesalmon.pastpeter.gameworld.Level;
+import com.mrchocolatesalmon.pastpeter.players.*;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -92,9 +95,9 @@ public class LevelConfig {
                                     String[] params = line.trim().split(":");
                                     String objectName = params[0];
 
-                                    Gdx.app.log("LevelConfig", "Creating: " + objectName + " at " + x + "," + y);
+                                    ObjectDef definition = GameData.objectDefinitions.get(objectName).CloneObjectDef();
 
-                                    int startState = 1;
+                                    Gdx.app.log("LevelConfig", "Creating: " + objectName + " at " + x + "," + y);
 
                                     //Apply other parameters
                                     int i = 1;
@@ -103,19 +106,47 @@ public class LevelConfig {
                                         String p = params[i];
                                         i++;
 
-                                        if (p.equals("start_state")){
-                                            startState = Integer.parseInt(params[i]);
+                                        if (p.equals("parameter")){
+                                            String[] parameter_desc = params[i].trim().split(",");
                                             i++;
+
+                                            definition.Parameter(parameter_desc[0], Integer.parseInt(parameter_desc[1]));
                                         }
                                     }
 
-                                    IngameObject obj = new IngameObject(new Vector3(x,y, startState), objectName, GameData.objectDefinitions.get(objectName));
+                                    IngameObject obj = new IngameObject(new Vector2(x,y), objectName, definition, newLevel);
 
                                     newLevel.AddObject(obj);
                                 }
                             }
                         }
 
+                    } else if (line.startsWith("players")) {
+                        line = lineReader.readLine();
+
+                        while (line != null && !line.startsWith("endplayers")){
+
+                            String[] params = line.trim().split(":");
+
+                            String name = params[0];
+
+                            String[] pastPositionS = params[1].split(",");
+                            String[] presentPositionS = params[2].split(",");
+                            String[] futurePositionS = params[3].split(",");
+                            String[] endFuturePositionS = params[4].split(",");
+
+                            Vector2 pastPosition = new Vector2(Integer.parseInt(pastPositionS[0]),Integer.parseInt(pastPositionS[1]));
+                            Vector2 presentPosition = new Vector2(Integer.parseInt(presentPositionS[0]),Integer.parseInt(presentPositionS[1]));
+                            Vector2 futurePosition = new Vector2(Integer.parseInt(futurePositionS[0]),Integer.parseInt(futurePositionS[1]));
+                            Vector2 endFuturePosition = new Vector2(Integer.parseInt(endFuturePositionS[0]),Integer.parseInt(endFuturePositionS[1]));
+
+                            if (name.equals("peter")){
+                                newLevel.players.add(new Peter(pastPosition, presentPosition, futurePosition, endFuturePosition, PlayerID.peter, newLevel));
+                            }
+
+
+                            line = lineReader.readLine();
+                        }
                     }
 
 

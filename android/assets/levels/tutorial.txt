@@ -61,7 +61,7 @@ null
 null
 null
 null
-tree:start_state:3
+tree:parameter:start_state,3
 axe
 null
 null
@@ -79,7 +79,7 @@ null
 null
 null
 null
-tree:start_state:2
+tree:parameter:start_state,2
 null
 null
 grass
@@ -106,14 +106,6 @@ grass
 null
 grass
 players
-peter
-4
-6
-2
-5
-8
-6
-8
-6
+peter:2,5:4,6:8,6:8,6
 endplayers
 endlevel

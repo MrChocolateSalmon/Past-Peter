@@ -6,7 +6,7 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
-import com.badlogic.gdx.math.Vector3;
+import com.badlogic.gdx.math.Vector2;
 import com.mrchocolatesalmon.pastpeter.datastructures.ObjectDef;
 import com.mrchocolatesalmon.pastpeter.datastructures.TimePosition;
 import com.mrchocolatesalmon.pastpeter.enums.TimeID;
@@ -24,15 +24,17 @@ public class IngameObject {
     protected String nameID = "";
 
     protected ObjectDef definition;
+    protected Level level;
 
-    public IngameObject(Vector3 startPast, String nameID, ObjectDef definition){
+    public IngameObject(Vector2 startPast, String nameID, ObjectDef definition, Level level){
 
         this.nameID = nameID;
         this.definition = definition;
+        this.level = level;
 
         //Past
         TimePosition[] positions = new TimePosition[GameData.MAXMOVES + GameData.FILLERSIZE];
-        TimePosition startPosition = new TimePosition((int)startPast.x, (int)startPast.y, (int)startPast.z);
+        TimePosition startPosition = new TimePosition((int)startPast.x, (int)startPast.y,definition.parameters.get("start_state"));
 
         for (int i = 0; i < GameData.MAXMOVES + GameData.FILLERSIZE; i++){
             positions[i] = startPosition.Clone();
@@ -56,9 +58,9 @@ public class IngameObject {
 
     public String getNameID(){ return nameID; }
 
-    public void render(Level level, SpriteBatch batcher){
+    public void render(SpriteBatch batcher){
 
-        TimePosition position = positionArray.get(level.currentTimeID)[level.getCurrentTime()];
+        TimePosition position = positionArray.get(level.getCurrentTimeID())[level.getCurrentTime()];
 
         if (position.aliveStatus == 0 || !definition.textureMap.containsKey(position.aliveStatus)){ return; }
 
@@ -72,6 +74,24 @@ public class IngameObject {
             //Gdx.app.log("IngameObject", String.valueOf(levelAge));
 
             batcher.draw((TextureRegion) anim.getKeyFrame(level.levelAge), position.x * GameData.GAMESIZE, position.y * GameData.GAMESIZE);
+        }
+    }
+
+    public void TimeUpdate(TimeID timeID, int time, TimeID previousTimeID){
+
+        TimePosition[] currentPositions = positionArray.get(timeID);
+        TimePosition[] earlierTimePositions = positionArray.get(previousTimeID);
+
+        TimePosition currentPosition = currentPositions[time];
+
+        if (time > 0){
+            TimePosition previousPosition = currentPositions[time - 1];
+            currentPosition.copyValues(previousPosition);
+
+
+        } else {
+            TimePosition previousPosition = earlierTimePositions[level.getCurrentTime(previousTimeID) + GameData.FILLERSIZE];
+            currentPosition.copyValues(previousPosition);
         }
     }
 }

@@ -7,6 +7,7 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Vector2;
 import com.mrchocolatesalmon.pastpeter.gameobjects.IngameObject;
+import com.mrchocolatesalmon.pastpeter.gameobjects.PlayerObject;
 import com.mrchocolatesalmon.pastpeter.helpers.AssetLoader;
 
 public class GameRenderer {
@@ -56,7 +57,14 @@ public class GameRenderer {
         {
             IngameObject obj = level.objects.get(i);
 
-            obj.render(level, batcher);
+            obj.render(batcher);
+        }
+
+        for (int i = 0; i < level.players.size(); i++)
+        {
+            PlayerObject player = level.players.get(i);
+
+            player.render(batcher);
         }
     }
 

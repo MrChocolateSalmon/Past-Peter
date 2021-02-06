@@ -26,7 +26,7 @@ public class Level {
     public LinkedList<IngameObject> objects = new LinkedList<IngameObject>();
     public LinkedList<PlayerObject> players = new LinkedList<PlayerObject>();
 
-    public TimeID currentTimeID;
+    TimeID currentTimeID;
 
     public Level(GameData game, int index) {
         this.game = game;
@@ -49,6 +49,13 @@ public class Level {
         futureTime = 0;
 
         currentTimeID = TimeID.present;
+    }
+
+    public TimeID getCurrentTimeID(){ return currentTimeID; }
+    public void setCurrentTimeID(TimeID timeID){
+        if (timeAvailable.get(timeID)){
+            currentTimeID = timeID;
+        }
     }
 
     public int getCurrentTime(TimeID timeID){

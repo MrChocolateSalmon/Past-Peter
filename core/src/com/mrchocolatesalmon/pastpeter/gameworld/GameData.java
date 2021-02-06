@@ -81,42 +81,65 @@ public class GameData {
     }
 
     void SetObjectDefinitions(){
-        objectDefinitions.put("axe", new ObjectDef().Tags(new String[]{"gravity", "pickup"})
+        objectDefinitions.put("axe", new ObjectDef().Parameter("gravity", 1).Parameter("pickup", 1)
                                 .Animation(1, "axe"));
 
-        objectDefinitions.put("builder", new ObjectDef().Tags(new String[]{"gravity", "npc"}));
-        objectDefinitions.put("bird", new ObjectDef().Tags(new String[]{"pickup", "npc"})
+        objectDefinitions.put("builder", new ObjectDef().Parameter("gravity", 1).Parameter("npc", 1));
+
+        objectDefinitions.put("bird", new ObjectDef().Parameter("pickup", 1).Parameter("npc",1)
                                 .Animation(1, "bird_stand").Animation(2, "bird_fly"));
 
-        objectDefinitions.put("carrot", new ObjectDef().Tags(new String[]{"pickup"}));
-        objectDefinitions.put("churchcross", new ObjectDef().Tags(new String[]{"pickup"}));
-        objectDefinitions.put("dog", new ObjectDef().Tags(new String[]{"gravity",  "npc"}));;
-        objectDefinitions.put("door", new ObjectDef().Tags(new String[]{"wall"}));
-        objectDefinitions.put("fragilestone", new ObjectDef().Tags(new String[]{"wall"}));
-        objectDefinitions.put("grass", new ObjectDef().Tags(new String[]{"wall"})
+        objectDefinitions.put("carrot", new ObjectDef().Parameter("pickup", 1));
+
+        objectDefinitions.put("churchcross", new ObjectDef());
+
+        objectDefinitions.put("dog", new ObjectDef().Parameter("gravity", 1).Parameter("npc", 1));
+
+        objectDefinitions.put("door", new ObjectDef().Parameter("wall",1));
+
+        objectDefinitions.put("fragilestone", new ObjectDef().Parameter("wall",1));
+
+        objectDefinitions.put("grass", new ObjectDef().Parameter("wall",1)
+
                                     .Animation(1, "grass"));
 
-        objectDefinitions.put("key", new ObjectDef().Tags(new String[]{"pickup"}));
-        objectDefinitions.put("ladder", new ObjectDef().Tags(new String[]{"ladder"}));
-        objectDefinitions.put("lever", new ObjectDef().Tags(new String[]{"interact"}));
-        objectDefinitions.put("leaf", new ObjectDef().Tags(new String[]{"wall"}));
-        objectDefinitions.put("openstone", new ObjectDef().Tags(new String[]{"wall"}));
-        objectDefinitions.put("platform", new ObjectDef().Tags(new String[]{"wall"}));
-        objectDefinitions.put("paradoxlever", new ObjectDef().Tags(new String[]{"interact"}));
-        objectDefinitions.put("paradoxplatform", new ObjectDef().Tags(new String[]{"wall"}));
-        objectDefinitions.put("pressureplate", new ObjectDef().Tags(new String[]{}));
-        objectDefinitions.put("rabbit", new ObjectDef().Tags(new String[]{"gravity", "npc"}));
-        objectDefinitions.put("seed", new ObjectDef().Tags(new String[]{"pickup"}));
-        objectDefinitions.put("stone", new ObjectDef().Tags(new String[]{"wall"}));
-        objectDefinitions.put("tallgrass", new ObjectDef().Tags(new String[]{}));
-        objectDefinitions.put("tree", new ObjectDef().Tags(new String[]{"wall"})
+        objectDefinitions.put("key", new ObjectDef().Parameter("pickup",1));
+
+        objectDefinitions.put("ladder", new ObjectDef().Parameter("ladder",1));
+
+        objectDefinitions.put("lever", new ObjectDef().Parameter("interact",1));
+
+        objectDefinitions.put("leaf", new ObjectDef().Parameter("wall",1));
+
+        objectDefinitions.put("openstone", new ObjectDef().Parameter("wall",1));
+
+        objectDefinitions.put("platform", new ObjectDef().Parameter("wall",1));
+
+        objectDefinitions.put("paradoxlever", new ObjectDef().Parameter("interact",1));
+
+        objectDefinitions.put("paradoxplatform", new ObjectDef().Parameter("wall",1));
+        objectDefinitions.put("pressureplate", new ObjectDef());
+
+        objectDefinitions.put("rabbit", new ObjectDef().Parameter("gravity",1).Parameter("npc",1));
+
+        objectDefinitions.put("seed", new ObjectDef().Parameter("pickup",1));
+
+        objectDefinitions.put("stone", new ObjectDef().Parameter("wall",1));
+
+        objectDefinitions.put("tallgrass", new ObjectDef());
+
+        objectDefinitions.put("tree", new ObjectDef().Parameter("wall",1)
                                 .Animation(-1, "tree_cut").Animation(2, "shrub").Animation(3, "tree"));
 
-        objectDefinitions.put("vines", new ObjectDef().Tags(new String[]{"ladder"}));
-        objectDefinitions.put("water", new ObjectDef().Tags(new String[]{"water"}));
-        objectDefinitions.put("woodenplank", new ObjectDef().Tags(new String[]{"wall"}));
-        objectDefinitions.put("woodencrate", new ObjectDef().Tags(new String[]{"wall", "push"}));
-        objectDefinitions.put("yellowbrick", new ObjectDef().Tags(new String[]{"wall"}));
+        objectDefinitions.put("vines", new ObjectDef().Parameter("ladder",1));
+
+        objectDefinitions.put("water", new ObjectDef().Parameter("water",1));
+
+        objectDefinitions.put("woodenplank", new ObjectDef().Parameter("wall",1));
+
+        objectDefinitions.put("woodencrate", new ObjectDef().Parameter("wall",1).Parameter("push",1));
+
+        objectDefinitions.put("yellowbrick", new ObjectDef().Parameter("wall",1));
     }
 
     public void dispose(){
