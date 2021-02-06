@@ -70,7 +70,7 @@ public class LevelSelectScreen implements Screen, ScreenMethods {
     }
 
     void startLevel(Level level) {
-        gameData.ingameScreen.setCurrentLevel(level);
+        gameData.ingameScreen.setCurrentLevel(level, false);
         screenControl.setScreen(gameData.ingameScreen);
     }
 

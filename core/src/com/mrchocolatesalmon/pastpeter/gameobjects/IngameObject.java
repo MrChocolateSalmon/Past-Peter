@@ -77,7 +77,7 @@ public class IngameObject {
         }
     }
 
-    public void TimeUpdate(TimeID timeID, int time, TimeID previousTimeID){
+    public void timeUpdate(TimeID timeID, int time, TimeID previousTimeID){
 
         TimePosition[] currentPositions = positionArray.get(timeID);
         TimePosition[] earlierTimePositions = positionArray.get(previousTimeID);

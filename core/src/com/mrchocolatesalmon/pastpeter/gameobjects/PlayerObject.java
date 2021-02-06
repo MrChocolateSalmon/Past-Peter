@@ -7,6 +7,7 @@ import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Vector2;
 import com.mrchocolatesalmon.pastpeter.datastructures.CommandInfo;
 import com.mrchocolatesalmon.pastpeter.datastructures.TimePosition;
+import com.mrchocolatesalmon.pastpeter.enums.CommandID;
 import com.mrchocolatesalmon.pastpeter.enums.PlayerID;
 import com.mrchocolatesalmon.pastpeter.enums.TimeID;
 import com.mrchocolatesalmon.pastpeter.gameworld.GameData;
@@ -39,26 +40,43 @@ public class PlayerObject {
         //Past
         TimePosition[] positions = new TimePosition[GameData.MAXMOVES + GameData.FILLERSIZE];
         TimePosition startPosition = new TimePosition((int)startPast.x, (int)startPast.y, 1);
+        CommandInfo[] commandsArray = new CommandInfo[GameData.MAXMOVES + GameData.FILLERSIZE];
         for (int i = 0; i < GameData.MAXMOVES + GameData.FILLERSIZE; i++){
             positions[i] = startPosition.Clone();
+            commandsArray[i] = new CommandInfo(CommandID.wait, null);
         }
         positionArray.put(TimeID.past, positions);
+        commands.put(TimeID.past, commandsArray);
 
         //Present
         positions = new TimePosition[GameData.MAXMOVES + GameData.FILLERSIZE];
         startPosition = new TimePosition((int)startPresent.x, (int)startPresent.y, 1);
+        commandsArray = new CommandInfo[GameData.MAXMOVES + GameData.FILLERSIZE];
         for (int i = 0; i < GameData.MAXMOVES + GameData.FILLERSIZE; i++){
             positions[i] = startPosition.Clone();
+            commandsArray[i] = new CommandInfo(CommandID.wait, null);
         }
         positionArray.put(TimeID.present, positions);
+        commands.put(TimeID.present, commandsArray);
 
         //Future
         positions = new TimePosition[GameData.MAXMOVES + GameData.FILLERSIZE];
         startPosition = new TimePosition((int)startFuture.x, (int)startFuture.y, 1);
+        commandsArray = new CommandInfo[GameData.MAXMOVES + GameData.FILLERSIZE];
         for (int i = 0; i < GameData.MAXMOVES + GameData.FILLERSIZE; i++){
             positions[i] = startPosition.Clone();
+            commandsArray[i] = new CommandInfo(CommandID.wait, null);
         }
         positionArray.put(TimeID.future, positions);
+        commands.put(TimeID.future, commandsArray);
+    }
+
+    public void setCommand(TimeID timeID, int time, CommandInfo command){
+        commands.get(timeID)[time] = command;
+    }
+
+    public TimePosition getPosition(TimeID timeID, int time){
+        return positionArray.get(timeID)[time];
     }
 
     public void timeUpdate(TimeID timeID, int time, TimeID previousTimeID){
@@ -72,13 +90,23 @@ public class PlayerObject {
             TimePosition previousPosition = currentPositions[time - 1];
             currentPosition.copyValues(previousPosition);
 
+            CommandInfo command = commands.get(timeID)[time];
+
+            switch(command.commandID){
+                case wait:
+                    break;
+                case move:
+                    currentPosition.x = (int)command.pos.x;
+                    currentPosition.y = (int)command.pos.y;
+                    break;
+            }
         }
     }
 
     public void render(SpriteBatch batcher) {
 
         TimeID timeID = level.getCurrentTimeID();
-        TimePosition position = positionArray.get(timeID)[level.getCurrentTime()];
+        TimePosition position = getPosition(timeID, level.getCurrentTime());
 
         if (!textureMap.get(timeID).containsKey("idle")){ return; }
 

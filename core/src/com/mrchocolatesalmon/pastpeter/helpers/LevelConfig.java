@@ -101,17 +101,12 @@ public class LevelConfig {
 
                                     //Apply other parameters
                                     int i = 1;
-                                    while (i < params.length){
+                                    while (i < params.length) {
 
-                                        String p = params[i];
+                                        String[] parameter_desc = params[i].trim().split(",");
                                         i++;
 
-                                        if (p.equals("parameter")){
-                                            String[] parameter_desc = params[i].trim().split(",");
-                                            i++;
-
-                                            definition.Parameter(parameter_desc[0], Integer.parseInt(parameter_desc[1]));
-                                        }
+                                        definition.Parameter(parameter_desc[0], Integer.parseInt(parameter_desc[1]));
                                     }
 
                                     IngameObject obj = new IngameObject(new Vector2(x,y), objectName, definition, newLevel);
@@ -157,6 +152,7 @@ public class LevelConfig {
             }
         }
 
+        newLevel.resetLevel();
         return newLevel;
     }
 }

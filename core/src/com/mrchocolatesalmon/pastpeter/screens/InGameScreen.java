@@ -4,7 +4,12 @@ import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.Screen;
+import com.badlogic.gdx.math.Vector2;
+import com.mrchocolatesalmon.pastpeter.datastructures.CommandInfo;
+import com.mrchocolatesalmon.pastpeter.datastructures.TimePosition;
+import com.mrchocolatesalmon.pastpeter.enums.CommandID;
 import com.mrchocolatesalmon.pastpeter.enums.TimeID;
+import com.mrchocolatesalmon.pastpeter.gameobjects.PlayerObject;
 import com.mrchocolatesalmon.pastpeter.gameworld.GameData;
 import com.mrchocolatesalmon.pastpeter.gameworld.Level;
 import com.mrchocolatesalmon.pastpeter.helpers.AssetLoader;
@@ -15,15 +20,19 @@ public class InGameScreen implements Screen, ScreenMethods {
 
     Level currentLevel;
 
+    boolean playerCanMoveLeft, playerCanMoveRight, playerCanMoveDown, playerCanMoveUp, playerCanInteract, playerCanPickup;
+
     public InGameScreen(GameData gameData, Game screenControl) {
         this.gameData = gameData;
         this.screenControl = screenControl;
     }
 
-    public void setCurrentLevel(Level level) {
+    public void setCurrentLevel(Level level, boolean restart) {
         this.currentLevel = level;
 
+        if (restart){ level.resetLevel(); }
 
+        checkPlayerOptions();
     }
 
     @Override
@@ -47,15 +56,118 @@ public class InGameScreen implements Screen, ScreenMethods {
 
     private void gameUpdate(){
 
+        PlayerObject activePlayer = currentLevel.getActivePlayer();
+        TimePosition playerPosition = activePlayer.getPosition(currentLevel.getCurrentTimeID(), currentLevel.getCurrentTime());
+
         if (gameData.inputs.keysPressed[Input.Keys.NUM_1]){
             currentLevel.setCurrentTimeID(TimeID.past);
+            sceneUpdate();
         } else if (gameData.inputs.keysPressed[Input.Keys.NUM_2]){
             currentLevel.setCurrentTimeID(TimeID.present);
+            sceneUpdate();
         } else if (gameData.inputs.keysPressed[Input.Keys.NUM_3]){
             currentLevel.setCurrentTimeID(TimeID.future);
+            sceneUpdate();
+        } else if (gameData.inputs.keysPressed[Input.Keys.BACKSPACE]){
+            decrementTime();
+        }
+
+        if (gameData.inputs.keysPressed[Input.Keys.LEFT]){
+            if (playerCanMoveLeft){
+                CommandInfo moveCommand = new CommandInfo(CommandID.move, new Vector2(playerPosition.x - 1,playerPosition.y));
+                playerTakeAction(moveCommand);
+            }
+        } else if (gameData.inputs.keysPressed[Input.Keys.RIGHT]){
+            if (playerCanMoveRight){
+                CommandInfo moveCommand = new CommandInfo(CommandID.move, new Vector2(playerPosition.x + 1,playerPosition.y));
+                playerTakeAction(moveCommand);
+            }
         }
 
         gameData.inputs.resetKeysPressed();
+    }
+
+    private void playerTakeAction(CommandInfo receivedCommand){
+        for (int i = 0; i < currentLevel.players.size(); i++){
+            PlayerObject player = currentLevel.players.get(i);
+
+            if (i == currentLevel.activePlayerNumber){
+                player.setCommand(currentLevel.getCurrentTimeID(), currentLevel.getCurrentTime() + 1, receivedCommand);
+                Gdx.app.log("InGameScreen", "Active Player Taking Action: " + receivedCommand.commandID.toString());
+            } else {
+                CommandInfo waitCommand = new CommandInfo(CommandID.wait, new Vector2(0,0));
+                player.setCommand(currentLevel.getCurrentTimeID(), currentLevel.getCurrentTime() + 1, waitCommand);
+            }
+        }
+
+        incrementTime();
+    }
+
+    private void incrementTime(){
+        currentLevel.incrementTime();
+
+        timeUpdateAll();
+    }
+
+    private void decrementTime(){
+        currentLevel.decrementTime();
+
+        sceneUpdate();
+    }
+
+    //Update all objects and players for the new time element and all future events
+    private void timeUpdateAll(){
+
+        TimeID[] updateTimes;
+
+        //Select current time id and all time ids in the future
+        if (currentLevel.getCurrentTimeID() == TimeID.past){
+            updateTimes = new TimeID[]{TimeID.past, TimeID.present, TimeID.future};
+        } else if (currentLevel.getCurrentTimeID() == TimeID.past){
+            updateTimes = new TimeID[]{TimeID.present, TimeID.future};
+        } else {
+            updateTimes = new TimeID[]{TimeID.future};
+        }
+
+        for (int u = 0; u < updateTimes.length; u++){
+
+            TimeID currentTimeID = currentLevel.getCurrentTimeID();
+            TimeID previousTimeID = (currentTimeID == TimeID.future) ? TimeID.present : TimeID.past;
+
+            //Start from the current point and update forward
+            int tempCurrentTime = currentLevel.getCurrentTime(currentTimeID);
+            for (int t = (u==0)?tempCurrentTime:0; t < tempCurrentTime + GameData.FILLERSIZE; t++) {
+
+                for (int i = 0; i < currentLevel.objects.size(); i++) {
+                    currentLevel.objects.get(i).timeUpdate(currentTimeID, t, previousTimeID);
+                }
+
+                for (int i = 0; i < currentLevel.players.size(); i++) {
+                    currentLevel.players.get(i).timeUpdate(currentTimeID, t, previousTimeID);
+                }
+            }
+        }
+
+        sceneUpdate(); //Update the scene when finished updating all objects and players
+    }
+
+    // Update the scene based on the new positions and states
+    private void sceneUpdate(){
+        checkPlayerOptions();
+        checkPlayerWin();
+    }
+
+    private void checkPlayerOptions(){
+        playerCanMoveLeft = true;
+        playerCanMoveRight = true;
+        playerCanMoveDown = false;
+        playerCanMoveUp = false;
+        playerCanInteract = false;
+        playerCanPickup = false;
+    }
+
+    private void checkPlayerWin(){
+
     }
 
     @Override

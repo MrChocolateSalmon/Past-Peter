@@ -18,13 +18,15 @@ public class Level {
 
     public String name = "???", hint = "No Hint/Story for this level.";
 
-    public int pastTime, presentTime, futureTime;
+    protected HashMap<TimeID, Integer> timeMap = new HashMap<TimeID, Integer>();
     public HashMap<TimeID, Boolean> timeAvailable = new HashMap<TimeID, Boolean>();
 
     public boolean platformActive = false;
 
     public LinkedList<IngameObject> objects = new LinkedList<IngameObject>();
     public LinkedList<PlayerObject> players = new LinkedList<PlayerObject>();
+
+    public int activePlayerNumber = 0;
 
     TimeID currentTimeID;
 
@@ -36,6 +38,10 @@ public class Level {
         timeAvailable.put(TimeID.present, true);
         timeAvailable.put(TimeID.future, true);
 
+        timeMap.put(TimeID.past, 0);
+        timeMap.put(TimeID.present, 0);
+        timeMap.put(TimeID.future, 0);
+
         resetLevel();
     }
 
@@ -44,11 +50,17 @@ public class Level {
     }
 
     public void resetLevel(){
-        pastTime = 0;
-        presentTime = 0;
-        futureTime = 0;
+        timeMap.put(TimeID.past, 0);
+        timeMap.put(TimeID.present, 0);
+        timeMap.put(TimeID.future, 0);
 
         currentTimeID = TimeID.present;
+
+        activePlayerNumber = 0;
+    }
+
+    public PlayerObject getActivePlayer(){
+        return players.get(activePlayerNumber);
     }
 
     public TimeID getCurrentTimeID(){ return currentTimeID; }
@@ -58,13 +70,26 @@ public class Level {
         }
     }
 
+    public void incrementTime(TimeID timeID){
+        timeMap.put(timeID, timeMap.get(timeID) + 1);
+    }
+
+    public void incrementTime(){
+        incrementTime(getCurrentTimeID());
+    }
+
+    public void decrementTime(TimeID timeID){
+        int newTime = timeMap.get(timeID) - 1;
+        if (newTime < 0){ newTime = 0;}
+        timeMap.put(timeID, newTime);
+    }
+
+    public void decrementTime(){
+        decrementTime(getCurrentTimeID());
+    }
+
     public int getCurrentTime(TimeID timeID){
-        switch(timeID){
-            case past: return pastTime;
-            case present: return presentTime;
-            case future: return futureTime;
-            default: return -1;
-        }
+        return timeMap.get(timeID);
     }
 
     public int getCurrentTime(){
