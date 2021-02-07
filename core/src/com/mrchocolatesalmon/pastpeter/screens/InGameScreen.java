@@ -7,8 +7,8 @@ import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.math.Vector2;
 import com.mrchocolatesalmon.pastpeter.datastructures.CommandInfo;
 import com.mrchocolatesalmon.pastpeter.datastructures.TimePosition;
-import com.mrchocolatesalmon.pastpeter.enums.CommandID;
 import com.mrchocolatesalmon.pastpeter.enums.TimeID;
+import com.mrchocolatesalmon.pastpeter.gameobjects.IngameObject;
 import com.mrchocolatesalmon.pastpeter.gameobjects.PlayerObject;
 import com.mrchocolatesalmon.pastpeter.gameworld.GameData;
 import com.mrchocolatesalmon.pastpeter.gameworld.Level;
@@ -20,7 +20,7 @@ public class InGameScreen implements Screen, ScreenMethods {
 
     Level currentLevel;
 
-    boolean playerCanMoveLeft, playerCanMoveRight, playerCanMoveDown, playerCanMoveUp, playerCanInteract, playerCanPickup;
+    boolean playerCanMoveLeft, playerCanMoveRight, playerCanMoveDown, playerCanMoveUp, playerCanInteract, playerCanPickup, playerCanDrop;
 
     public InGameScreen(GameData gameData, Game screenControl) {
         this.gameData = gameData;
@@ -76,18 +76,24 @@ public class InGameScreen implements Screen, ScreenMethods {
 
         if (gameData.inputs.keysPressed[Input.Keys.LEFT]){
             if (playerCanMoveLeft){
-                CommandInfo moveCommand = new CommandInfo(CommandID.move, new Vector2(playerPosition.x - 1,playerPosition.y));
+                CommandInfo moveCommand = new CommandInfo(CommandInfo.CommandID.move, new Vector2(playerPosition.x - 1,playerPosition.y));
                 playerTakeAction(moveCommand);
             }
         } else if (gameData.inputs.keysPressed[Input.Keys.RIGHT]){
             if (playerCanMoveRight){
-                CommandInfo moveCommand = new CommandInfo(CommandID.move, new Vector2(playerPosition.x + 1,playerPosition.y));
+                CommandInfo moveCommand = new CommandInfo(CommandInfo.CommandID.move, new Vector2(playerPosition.x + 1,playerPosition.y));
                 playerTakeAction(moveCommand);
             }
         } else if (gameData.inputs.keysPressed[Input.Keys.DOWN]){
             if (playerCanMoveDown){
-                CommandInfo moveCommand = new CommandInfo(CommandID.move, new Vector2(playerPosition.x,playerPosition.y + 1));
+                CommandInfo moveCommand = new CommandInfo(CommandInfo.CommandID.move, new Vector2(playerPosition.x,playerPosition.y + 1));
                 playerTakeAction(moveCommand);
+            } else if (playerCanDrop){
+                CommandInfo dropCommand = new CommandInfo(CommandInfo.CommandID.drop, new Vector2(playerPosition.x,playerPosition.y ));
+                playerTakeAction(dropCommand);
+            } else if (playerCanPickup){
+                CommandInfo pickupCommand = new CommandInfo(CommandInfo.CommandID.pickup, new Vector2(playerPosition.x,playerPosition.y ));
+                playerTakeAction(pickupCommand);
             }
         }
 
@@ -102,7 +108,7 @@ public class InGameScreen implements Screen, ScreenMethods {
                 player.setCommand(currentLevel.getCurrentTimeID(), currentLevel.getCurrentTime() + 1, receivedCommand);
                 Gdx.app.log("InGameScreen", "Active Player Taking Action: " + receivedCommand.commandID.toString());
             } else {
-                CommandInfo waitCommand = new CommandInfo(CommandID.wait, new Vector2(0,0));
+                CommandInfo waitCommand = new CommandInfo(CommandInfo.CommandID.wait, new Vector2(0,0));
                 player.setCommand(currentLevel.getCurrentTimeID(), currentLevel.getCurrentTime() + 1, waitCommand);
             }
         }
@@ -127,6 +133,8 @@ public class InGameScreen implements Screen, ScreenMethods {
 
         TimeID[] updateTimes;
 
+        Gdx.app.log("InGameScreen", "timeUpdateAll() start");
+
         //Select current time id and all time ids in the future
         if (startID == TimeID.past){
             updateTimes = new TimeID[]{TimeID.past, TimeID.present, TimeID.future};
@@ -138,24 +146,27 @@ public class InGameScreen implements Screen, ScreenMethods {
 
         for (int u = 0; u < updateTimes.length; u++){
 
-            TimeID currentTimeID = currentLevel.getCurrentTimeID();
+            TimeID currentTimeID = updateTimes[u];
             TimeID previousTimeID = (currentTimeID == TimeID.future) ? TimeID.present : TimeID.past;
 
             //Start from the current point and update forward
             int tempCurrentTime = currentLevel.getCurrentTime(currentTimeID);
             for (int t = (u==0)?tempCurrentTime:0; t < tempCurrentTime + GameData.FILLERSIZE; t++) {
 
-                for (int i = 0; i < currentLevel.objects.size(); i++) {
-                    currentLevel.objects.get(i).timeUpdate(currentTimeID, t, previousTimeID);
-                }
-
                 for (int i = 0; i < currentLevel.players.size(); i++) {
                     currentLevel.players.get(i).timeUpdate(currentTimeID, t, previousTimeID);
+                }
+
+                for (int i = 0; i < currentLevel.objects.size(); i++) {
+                    currentLevel.objects.get(i).timeUpdate(currentTimeID, t, previousTimeID);
+
                 }
             }
         }
 
         sceneUpdate(); //Update the scene when finished updating all objects and players
+
+        Gdx.app.log("InGameScreen", "timeUpdateAll() end");
     }
 
     // Update the scene based on the new positions and states
@@ -164,7 +175,7 @@ public class InGameScreen implements Screen, ScreenMethods {
         checkPlayerWin();
     }
 
-    private void checkPlayerOptions(){
+    private void checkPlayerOptions() {
 
         TimeID currentTimeID = currentLevel.getCurrentTimeID();
         int currentTime = currentLevel.getCurrentTime();
@@ -172,14 +183,18 @@ public class InGameScreen implements Screen, ScreenMethods {
         PlayerObject activePlayer = currentLevel.getActivePlayer();
         TimePosition playerPosition = activePlayer.getPosition(currentTimeID, currentTime);
 
-        boolean inAir =  !activePlayer.checkCollision(new Vector2(playerPosition.x, playerPosition.y + 1), currentTimeID, currentTime);
+        IngameObject currentlyHolding = activePlayer.getHolding(currentTimeID, currentTime);
+        IngameObject potentialHolding = currentLevel.findGameobjectWithParameter("pickup", new Vector2(playerPosition.x, playerPosition.y), currentTimeID, currentTime);
+
+        boolean inAir = !activePlayer.checkCollision(new Vector2(playerPosition.x, playerPosition.y + 1), currentTimeID, currentTime);
 
         playerCanMoveLeft = !inAir && !activePlayer.checkCollision(new Vector2(playerPosition.x - 1, playerPosition.y), currentTimeID, currentTime);
         playerCanMoveRight = !inAir && !activePlayer.checkCollision(new Vector2(playerPosition.x + 1, playerPosition.y), currentTimeID, currentTime);
         playerCanMoveDown = inAir;
         playerCanMoveUp = false;
         playerCanInteract = false;
-        playerCanPickup = false;
+        playerCanPickup = currentlyHolding == null && potentialHolding != null;
+        playerCanDrop = currentlyHolding != null && potentialHolding == null;
     }
 
     private void checkPlayerWin(){

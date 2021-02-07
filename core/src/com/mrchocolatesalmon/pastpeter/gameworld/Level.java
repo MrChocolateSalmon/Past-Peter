@@ -1,5 +1,7 @@
 package com.mrchocolatesalmon.pastpeter.gameworld;
 
+import com.badlogic.gdx.math.Vector2;
+import com.mrchocolatesalmon.pastpeter.datastructures.TimePosition;
 import com.mrchocolatesalmon.pastpeter.enums.BackgroundType;
 import com.mrchocolatesalmon.pastpeter.enums.TimeID;
 import com.mrchocolatesalmon.pastpeter.gameobjects.IngameObject;
@@ -96,6 +98,20 @@ public class Level {
 
     public int getCurrentTime(){
         return getCurrentTime(currentTimeID);
+    }
+
+    public IngameObject findGameobjectWithParameter(String parameter, Vector2 pos, TimeID timeID, int time){
+
+        for (int i = 0; i < objects.size(); i++){
+            IngameObject temp = objects.get(i);
+            TimePosition objPos = temp.getTimePosition(timeID,time);
+
+            if (objPos.x == pos.x && objPos.y == pos.y && temp.parameterValue(parameter) != 0){
+                return temp;
+            }
+        }
+
+        return null;
     }
 
     public void SetBackground(BackgroundType backgroundType) {

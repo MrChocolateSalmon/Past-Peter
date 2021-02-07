@@ -6,8 +6,8 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Vector2;
 import com.mrchocolatesalmon.pastpeter.datastructures.CommandInfo;
+import com.mrchocolatesalmon.pastpeter.datastructures.Interrupt;
 import com.mrchocolatesalmon.pastpeter.datastructures.TimePosition;
-import com.mrchocolatesalmon.pastpeter.enums.CommandID;
 import com.mrchocolatesalmon.pastpeter.enums.PlayerID;
 import com.mrchocolatesalmon.pastpeter.enums.TimeID;
 import com.mrchocolatesalmon.pastpeter.gameworld.GameData;
@@ -43,7 +43,7 @@ public class PlayerObject {
         CommandInfo[] commandsArray = new CommandInfo[GameData.MAXMOVES + GameData.FILLERSIZE];
         for (int i = 0; i < GameData.MAXMOVES + GameData.FILLERSIZE; i++){
             positions[i] = startPosition.Clone();
-            commandsArray[i] = new CommandInfo(CommandID.wait, null);
+            commandsArray[i] = new CommandInfo(CommandInfo.CommandID.wait, null);
         }
         positionArray.put(TimeID.past, positions);
         commands.put(TimeID.past, commandsArray);
@@ -54,7 +54,7 @@ public class PlayerObject {
         commandsArray = new CommandInfo[GameData.MAXMOVES + GameData.FILLERSIZE];
         for (int i = 0; i < GameData.MAXMOVES + GameData.FILLERSIZE; i++){
             positions[i] = startPosition.Clone();
-            commandsArray[i] = new CommandInfo(CommandID.wait, null);
+            commandsArray[i] = new CommandInfo(CommandInfo.CommandID.wait, null);
         }
         positionArray.put(TimeID.present, positions);
         commands.put(TimeID.present, commandsArray);
@@ -65,7 +65,7 @@ public class PlayerObject {
         commandsArray = new CommandInfo[GameData.MAXMOVES + GameData.FILLERSIZE];
         for (int i = 0; i < GameData.MAXMOVES + GameData.FILLERSIZE; i++){
             positions[i] = startPosition.Clone();
-            commandsArray[i] = new CommandInfo(CommandID.wait, null);
+            commandsArray[i] = new CommandInfo(CommandInfo.CommandID.wait, null);
         }
         positionArray.put(TimeID.future, positions);
         commands.put(TimeID.future, commandsArray);
@@ -77,6 +77,31 @@ public class PlayerObject {
 
     public TimePosition getPosition(TimeID timeID, int time){
         return positionArray.get(timeID)[time];
+    }
+
+    public IngameObject getHolding(TimeID timeID, int time){ return getPosition(timeID,time).holding; }
+
+    private void drop(TimeID timeID, int time){
+        IngameObject obj = getHolding(timeID, time);
+
+        if (obj != null){
+            obj.sendInterrupt(new Interrupt(Interrupt.InterruptID.drop, this), timeID, time);
+            positionArray.get(timeID)[time].holding = null;
+        }
+    }
+
+    public void drop(TimeID timeID, int time, IngameObject dropObj){
+        IngameObject obj = getHolding(timeID, time);
+
+        if (obj == dropObj && obj != null){
+            obj.sendInterrupt(new Interrupt(Interrupt.InterruptID.drop, this), timeID, time);
+            positionArray.get(timeID)[time].holding = null;
+        }
+    }
+
+    public void hold(IngameObject obj, TimeID timeID, int time){
+        drop(timeID, time); //Drop anything the player is already holding
+        positionArray.get(timeID)[time].holding = obj; //Carry this new object
     }
 
     public void timeUpdate(TimeID timeID, int time, TimeID previousTimeID){
@@ -99,7 +124,22 @@ public class PlayerObject {
                     currentPosition.x = (int)command.pos.x;
                     currentPosition.y = (int)command.pos.y;
                     break;
+                case pickup:
+                    IngameObject potentialHolding = level.findGameobjectWithParameter("pickup", new Vector2(currentPosition.x, currentPosition.y), timeID, time);
+                    if (potentialHolding != null){
+                        potentialHolding.sendInterrupt(new Interrupt(Interrupt.InterruptID.pickup, this), timeID, time);
+                    }
+                    break;
+                case drop:
+                    drop(timeID, time);
+                    break;
             }
+
+        } else if (timeID != TimeID.past){
+            TimePosition previousPosition = earlierTimePositions[level.getCurrentTime(previousTimeID) + GameData.FILLERSIZE - 1];
+            currentPosition.aliveStatus = previousPosition.aliveStatus;
+            currentPosition.holding = previousPosition.holding;
+
         }
     }
 

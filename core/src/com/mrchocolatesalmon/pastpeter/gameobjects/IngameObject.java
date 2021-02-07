@@ -7,6 +7,7 @@ import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Vector2;
+import com.mrchocolatesalmon.pastpeter.datastructures.Interrupt;
 import com.mrchocolatesalmon.pastpeter.datastructures.ObjectDef;
 import com.mrchocolatesalmon.pastpeter.datastructures.TimePosition;
 import com.mrchocolatesalmon.pastpeter.enums.TimeID;
@@ -19,6 +20,8 @@ import java.util.HashMap;
 public class IngameObject {
 
     protected HashMap<TimeID,TimePosition[]> positionArray = new HashMap<TimeID, TimePosition[]>();
+    protected HashMap<TimeID, Interrupt[]> interrupts = new HashMap<TimeID, Interrupt[]>();
+
     protected HashMap<String, Boolean> tags = new HashMap<String, Boolean>();
 
     protected String nameID = "";
@@ -26,34 +29,50 @@ public class IngameObject {
     protected ObjectDef definition;
     protected Level level;
 
+    protected Vector2 startPast;
+
     public IngameObject(Vector2 startPast, String nameID, ObjectDef definition, Level level){
 
         this.nameID = nameID;
         this.definition = definition;
         this.level = level;
 
+        this.startPast = startPast;
+        Reset();
+    }
+
+    public void Reset(){
         //Past
         TimePosition[] positions = new TimePosition[GameData.MAXMOVES + GameData.FILLERSIZE];
+        Interrupt[] interruptArray = new Interrupt[GameData.MAXMOVES + GameData.FILLERSIZE];
         TimePosition startPosition = new TimePosition((int)startPast.x, (int)startPast.y,definition.parameters.get("start_state"));
 
         for (int i = 0; i < GameData.MAXMOVES + GameData.FILLERSIZE; i++){
             positions[i] = startPosition.Clone();
+            interruptArray[i] = null;
         }
         positionArray.put(TimeID.past, positions);
+        interrupts.put(TimeID.past, interruptArray);
 
         //Present
         positions = new TimePosition[GameData.MAXMOVES + GameData.FILLERSIZE];
+        interruptArray = new Interrupt[GameData.MAXMOVES + GameData.FILLERSIZE];
         for (int i = 0; i < GameData.MAXMOVES + GameData.FILLERSIZE; i++){
             positions[i] = startPosition.Clone();
+            interruptArray[i] = null;
         }
         positionArray.put(TimeID.present, positions);
+        interrupts.put(TimeID.present, interruptArray);
 
         //Future
         positions = new TimePosition[GameData.MAXMOVES + GameData.FILLERSIZE];
+        interruptArray = new Interrupt[GameData.MAXMOVES + GameData.FILLERSIZE];
         for (int i = 0; i < GameData.MAXMOVES + GameData.FILLERSIZE; i++){
             positions[i] = startPosition.Clone();
+            interruptArray[i] = null;
         }
         positionArray.put(TimeID.future, positions);
+        interrupts.put(TimeID.future, interruptArray);
     }
 
     public String getNameID(){ return nameID; }
@@ -85,12 +104,46 @@ public class IngameObject {
         TimePosition currentPosition = currentPositions[time];
 
         if (time > 0){
+
+            //======= During TimeID =======
             TimePosition previousPosition = currentPositions[time - 1];
             currentPosition.copyValues(previousPosition);
 
+            Interrupt interrupt = interrupts.get(timeID)[time];
+
+            if (interrupt != null){
+
+                switch (interrupt.interruptID){
+                    case pickup:
+                        interrupt.caller.hold(this, timeID, time); //Confirm pickup with player
+                        currentPosition.aliveStatus = 0; //Set alive status to 0 to hide
+                        Gdx.app.log("IngameObject", nameID + ": processing pickup interrupt");
+                        break;
+
+                    case drop:
+                        if (currentPosition.aliveStatus == 0){
+                            interrupt.caller.drop(timeID, time, this);
+
+                            TimePosition callerPosition = interrupt.caller.positionArray.get(timeID)[time];
+
+                            currentPosition.x = callerPosition.x;
+                            currentPosition.y = callerPosition.y;
+                            currentPosition.aliveStatus = 1;
+                        }
+                        break;
+                }
+
+                interrupts.get(timeID)[time] = null;
+            }
+
+            if (currentPosition.aliveStatus > 0){
+
+            }
 
         } else {
-            TimePosition previousPosition = earlierTimePositions[level.getCurrentTime(previousTimeID) + GameData.FILLERSIZE];
+
+            //======= Start of timeID =======
+            TimePosition previousPosition = earlierTimePositions[level.getCurrentTime(previousTimeID) + GameData.FILLERSIZE - 1];
             currentPosition.copyValues(previousPosition);
 
             if (timeID != TimeID.past && currentPosition.aliveStatus > 0){
@@ -101,6 +154,18 @@ public class IngameObject {
                 }
             }
         }
+
+        if (nameID.equals("axe")){Gdx.app.log("IngameObject", "axe: " + timeID.toString() + " " + String.valueOf(time) + ", a=" + currentPosition.aliveStatus); }
+    }
+
+    public void sendInterrupt(Interrupt interrupt, TimeID timeID, int time){
+        interrupts.get(timeID)[time] = interrupt;
+
+        Gdx.app.log("IngameObject", nameID + ": received " + interrupt.interruptID.toString() + " interrupt at " + timeID.toString() + " " + String.valueOf(time));
+    }
+
+    public TimePosition getTimePosition(TimeID timeID, int time){
+        return positionArray.get(timeID)[time];
     }
 
     public int parameterValue(String param){

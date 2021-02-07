@@ -1,7 +1,6 @@
 package com.mrchocolatesalmon.pastpeter.datastructures;
 
 import com.badlogic.gdx.math.Vector2;
-import com.mrchocolatesalmon.pastpeter.enums.CommandID;
 
 public class CommandInfo {
     public CommandID commandID = CommandID.wait;
@@ -11,4 +10,6 @@ public class CommandInfo {
         this.commandID = commandID;
         this.pos = pos;
     }
+
+    public enum CommandID { wait, move, pickup, drop, interact; }
 }
