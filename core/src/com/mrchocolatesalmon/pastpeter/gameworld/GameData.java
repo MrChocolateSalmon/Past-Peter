@@ -128,8 +128,8 @@ public class GameData {
 
         objectDefinitions.put("tallgrass", new ObjectDef());
 
-        objectDefinitions.put("tree", new ObjectDef().Parameter("wall",1)
-                                .Animation(-1, "tree_cut").Animation(2, "shrub").Animation(3, "tree"));
+        objectDefinitions.put("tree", new ObjectDef().Parameter("wall",3).Parameter("grow_state", 1)
+                                .Animation(-1, "tree_cut").Animation(2, "shrub").Animation(3, 4, "tree"));
 
         objectDefinitions.put("vines", new ObjectDef().Parameter("ladder",1));
 

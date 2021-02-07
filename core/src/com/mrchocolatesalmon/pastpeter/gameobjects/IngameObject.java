@@ -92,6 +92,20 @@ public class IngameObject {
         } else {
             TimePosition previousPosition = earlierTimePositions[level.getCurrentTime(previousTimeID) + GameData.FILLERSIZE];
             currentPosition.copyValues(previousPosition);
+
+            if (timeID != TimeID.past && currentPosition.aliveStatus > 0){
+                int grow_state = parameterValue("grow_state");
+
+                if (grow_state != 0){
+                    currentPosition.aliveStatus += grow_state;
+                }
+            }
         }
+    }
+
+    public int parameterValue(String param){
+        if (!definition.parameters.containsKey(param)){ return 0; }
+
+        return definition.parameters.get(param);
     }
 }

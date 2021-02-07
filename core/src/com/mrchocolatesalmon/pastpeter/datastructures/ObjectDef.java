@@ -22,6 +22,14 @@ public class ObjectDef {
         return this;
     }
 
+    //Inserts animation for a range of states (between start and end inclusive)
+    public ObjectDef Animation(int stateStart, int startEnd, String texName){
+        for (int i = stateStart; i <= startEnd; i++){
+            textureMap.put(i, texName);
+        }
+        return this;
+    }
+
     public ObjectDef CloneObjectDef(){
         ObjectDef c = new ObjectDef();
 

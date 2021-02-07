@@ -122,4 +122,41 @@ public class PlayerObject {
         }
     }
 
+    public boolean checkCollision(Vector2 checkPosition, TimeID timeID, int time){
+
+        TimePosition myPos = positionArray.get(timeID)[time];
+
+        //Check for collisions with other characters
+        for (int p = 0; p < level.players.size(); p++){
+            PlayerObject tempPlayer = level.players.get(p);
+
+            if (tempPlayer != this){
+                TimePosition tempPos = tempPlayer.positionArray.get(timeID)[time];
+
+                if (tempPos.x == checkPosition.x && tempPos.y == checkPosition.y) {
+                    return true;
+                }
+            }
+        }
+
+        for (int i = 0; i < level.objects.size(); i++){
+            IngameObject obj = level.objects.get(i);
+
+            TimePosition objPos = obj.positionArray.get(timeID)[time];
+
+            //If object is at position
+            if (objPos.x == checkPosition.x && objPos.y == checkPosition.y){
+
+                int wallType = obj.parameterValue("wall");
+
+                //If object is currently a wall (blocking movement)
+                if (wallType != 0 && objPos.aliveStatus >= wallType){
+                    return true;
+                }
+            }
+        }
+
+        return false;
+    }
+
 }

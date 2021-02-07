@@ -32,6 +32,8 @@ public class InGameScreen implements Screen, ScreenMethods {
 
         if (restart){ level.resetLevel(); }
 
+        timeUpdateAll(TimeID.past); //Perform the first time update for all objects
+
         checkPlayerOptions();
     }
 
@@ -82,6 +84,11 @@ public class InGameScreen implements Screen, ScreenMethods {
                 CommandInfo moveCommand = new CommandInfo(CommandID.move, new Vector2(playerPosition.x + 1,playerPosition.y));
                 playerTakeAction(moveCommand);
             }
+        } else if (gameData.inputs.keysPressed[Input.Keys.DOWN]){
+            if (playerCanMoveDown){
+                CommandInfo moveCommand = new CommandInfo(CommandID.move, new Vector2(playerPosition.x,playerPosition.y + 1));
+                playerTakeAction(moveCommand);
+            }
         }
 
         gameData.inputs.resetKeysPressed();
@@ -106,7 +113,7 @@ public class InGameScreen implements Screen, ScreenMethods {
     private void incrementTime(){
         currentLevel.incrementTime();
 
-        timeUpdateAll();
+        timeUpdateAll(currentLevel.getCurrentTimeID());
     }
 
     private void decrementTime(){
@@ -116,14 +123,14 @@ public class InGameScreen implements Screen, ScreenMethods {
     }
 
     //Update all objects and players for the new time element and all future events
-    private void timeUpdateAll(){
+    private void timeUpdateAll(TimeID startID){
 
         TimeID[] updateTimes;
 
         //Select current time id and all time ids in the future
-        if (currentLevel.getCurrentTimeID() == TimeID.past){
+        if (startID == TimeID.past){
             updateTimes = new TimeID[]{TimeID.past, TimeID.present, TimeID.future};
-        } else if (currentLevel.getCurrentTimeID() == TimeID.past){
+        } else if (startID == TimeID.present){
             updateTimes = new TimeID[]{TimeID.present, TimeID.future};
         } else {
             updateTimes = new TimeID[]{TimeID.future};
@@ -158,9 +165,18 @@ public class InGameScreen implements Screen, ScreenMethods {
     }
 
     private void checkPlayerOptions(){
-        playerCanMoveLeft = true;
-        playerCanMoveRight = true;
-        playerCanMoveDown = false;
+
+        TimeID currentTimeID = currentLevel.getCurrentTimeID();
+        int currentTime = currentLevel.getCurrentTime();
+
+        PlayerObject activePlayer = currentLevel.getActivePlayer();
+        TimePosition playerPosition = activePlayer.getPosition(currentTimeID, currentTime);
+
+        boolean inAir =  !activePlayer.checkCollision(new Vector2(playerPosition.x, playerPosition.y + 1), currentTimeID, currentTime);
+
+        playerCanMoveLeft = !inAir && !activePlayer.checkCollision(new Vector2(playerPosition.x - 1, playerPosition.y), currentTimeID, currentTime);
+        playerCanMoveRight = !inAir && !activePlayer.checkCollision(new Vector2(playerPosition.x + 1, playerPosition.y), currentTimeID, currentTime);
+        playerCanMoveDown = inAir;
         playerCanMoveUp = false;
         playerCanInteract = false;
         playerCanPickup = false;

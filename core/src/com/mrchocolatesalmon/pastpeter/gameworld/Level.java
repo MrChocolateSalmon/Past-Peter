@@ -57,6 +57,8 @@ public class Level {
         currentTimeID = TimeID.present;
 
         activePlayerNumber = 0;
+
+        levelAge = 0;
     }
 
     public PlayerObject getActivePlayer(){
