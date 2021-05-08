@@ -117,4 +117,18 @@ public class Level {
     public void SetBackground(BackgroundType backgroundType) {
         backType = backgroundType;
     }
+
+    public LinkedList<IngameObject> getObjectsAt(TimeID timeID, int time, Vector2 pos) {
+        LinkedList<IngameObject> objs = new LinkedList<IngameObject>();
+
+        for (int i = 0; i < objects.size(); i++){
+            IngameObject obj = objects.get(i);
+
+            TimePosition timePos = obj.getTimePosition(timeID, time);
+
+            if (timePos.x == pos.x && timePos.y == pos.y){ objs.add(obj); }
+        }
+
+        return objs;
+    }
 }

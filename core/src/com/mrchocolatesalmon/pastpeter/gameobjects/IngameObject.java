@@ -16,6 +16,8 @@ import com.mrchocolatesalmon.pastpeter.gameworld.Level;
 import com.mrchocolatesalmon.pastpeter.helpers.AssetLoader;
 
 import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.concurrent.atomic.AtomicReference;
 
 public class IngameObject {
 
@@ -111,13 +113,14 @@ public class IngameObject {
 
             Interrupt interrupt = interrupts.get(timeID)[time];
 
+            //Handle any interrupts for this time point
             if (interrupt != null){
 
                 switch (interrupt.interruptID){
                     case pickup:
                         interrupt.caller.hold(this, timeID, time); //Confirm pickup with player
                         currentPosition.aliveStatus = 0; //Set alive status to 0 to hide
-                        Gdx.app.log("IngameObject", nameID + ": processing pickup interrupt");
+                        //Gdx.app.log("IngameObject", nameID + ": processing pickup interrupt");
                         break;
 
                     case drop:
@@ -131,13 +134,53 @@ public class IngameObject {
                             currentPosition.aliveStatus = 1;
                         }
                         break;
+
+                    case use:
+
+                        //Gdx.app.log("IngameObject", nameID + ": use interrupt");
+                        Vector2 pos = new Vector2(interrupt.targetPos.x, interrupt.targetPos.y);
+                        LinkedList<IngameObject> objs = level.getObjectsAt(timeID, time, pos);
+
+                        AtomicReference<String> parameterName = new AtomicReference<String>();
+
+                        IngameObject toUseOn = objectToUseOn(timeID, time, pos, objs, parameterName);
+                        if (toUseOn != null){
+
+                            switch (parameterName.get()){
+                                case "cut":
+                                    toUseOn.sendInterrupt(new Interrupt(Interrupt.InterruptID.itemUsedOn, interrupt.caller), timeID, time);
+                                    break;
+                            }
+                        } else {
+
+                        }
+
+                        break;
+
+                    case itemUsedOn:
+
+                        //Gdx.app.log("IngameObject", nameID + ": itemUsedOn interrupt");
+                        IngameObject item = interrupt.caller.getHolding(timeID, time);
+                        if (item == null){ break; }
+
+                        String useParameter = parameterForInteracting(timeID, time, item);
+
+                        switch(useParameter){
+                            case "cut":
+                                if (currentPosition.aliveStatus > 0) {
+                                    currentPosition.aliveStatus = (currentPosition.aliveStatus * -1) + 1;
+                                }
+                                break;
+                        }
+                        break;
                 }
 
                 interrupts.get(timeID)[time] = null;
             }
 
+            //Continue processing this time point
             if (currentPosition.aliveStatus > 0){
-
+                //TODO: Check other parameters and execute accordingly
             }
 
         } else {
@@ -155,7 +198,48 @@ public class IngameObject {
             }
         }
 
-        if (nameID.equals("axe")){Gdx.app.log("IngameObject", "axe: " + timeID.toString() + " " + String.valueOf(time) + ", a=" + currentPosition.aliveStatus); }
+//        if (nameID.equals("axe")){Gdx.app.log("IngameObject", "axe: " + timeID.toString() + " " + String.valueOf(time) + ", a=" + currentPosition.aliveStatus); }
+    }
+
+    public boolean canUseHere(Vector2 pos, TimeID timeID, int time){
+        if (definition.parameters.get("pickup") == 0){ return false; }
+
+        TimePosition[] currentPositions = positionArray.get(timeID);
+        TimePosition currentPosition = currentPositions[time];
+
+        LinkedList<IngameObject> objs = level.getObjectsAt(timeID, time, pos);
+
+        if (objectToUseOn(timeID, time, pos, objs, null) != null) { return true; }
+
+        return emptySpaceToUseOn(timeID, time, pos, objs);
+    }
+
+    public IngameObject objectToUseOn(TimeID timeID, int time, Vector2 pos, LinkedList<IngameObject> objs, AtomicReference<String> stringRef){
+
+        int myCut = parameterValue("cut");
+
+        //TODO: Return null if all of the above parameters are equal to 0?
+        if (myCut == 0){
+            return null;
+        }
+
+        for (int i = 0; i < objs.size(); i++){
+            IngameObject obj = objs.get(i);
+
+            if ((myCut == 1 || myCut == 3) && obj.parameterValue("cut") >= 2) {
+                if (stringRef != null){ stringRef.set("cut"); }
+                return obj;
+            }
+        }
+
+        return null;
+    }
+
+    public boolean emptySpaceToUseOn(TimeID timeID, int time, Vector2 pos, LinkedList<IngameObject> objs) {
+
+        //TODO: return false unless it has a certain parameter
+
+        return false;
     }
 
     public void sendInterrupt(Interrupt interrupt, TimeID timeID, int time){
@@ -172,5 +256,15 @@ public class IngameObject {
         if (!definition.parameters.containsKey(param)){ return 0; }
 
         return definition.parameters.get(param);
+    }
+
+    public String parameterForInteracting(TimeID timeID, int time, IngameObject item) {
+        TimePosition myTimePos = getTimePosition(timeID, time), itemTimePos = item.getTimePosition(timeID, time);
+        
+        if (parameterValue("cut") >= 2 && (item.parameterValue("cut") == 1 || item.parameterValue("cut") == 3)){
+            return "cut";
+        }
+
+        return "";
     }
 }

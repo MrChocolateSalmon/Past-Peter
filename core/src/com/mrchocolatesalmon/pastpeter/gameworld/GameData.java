@@ -82,7 +82,7 @@ public class GameData {
 
     void SetObjectDefinitions(){
         objectDefinitions.put("axe", new ObjectDef().Parameter("gravity", 1).Parameter("pickup", 1)
-                                .Animation(1, "axe"));
+                            .Parameter("cut", 1).Animation(1, "axe"));
 
         objectDefinitions.put("builder", new ObjectDef().Parameter("gravity", 1).Parameter("npc", 1));
 
@@ -128,7 +128,7 @@ public class GameData {
 
         objectDefinitions.put("tallgrass", new ObjectDef());
 
-        objectDefinitions.put("tree", new ObjectDef().Parameter("wall",3).Parameter("grow_state", 1)
+        objectDefinitions.put("tree", new ObjectDef().Parameter("wall",3).Parameter("grow_state", 1).Parameter("cut", 2)
                                 .Animation(-1, "tree_cut").Animation(2, "shrub").Animation(3, 4, "tree"));
 
         objectDefinitions.put("vines", new ObjectDef().Parameter("ladder",1));

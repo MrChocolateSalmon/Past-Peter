@@ -39,3 +39,7 @@ public class ObjectDef {
         return c;
     }
 }
+
+//==Parameters==
+// [cut] 1 = can cut, 2 = can be cut, 3 = can both cut and be cut
+// [wall] becomes a wall if alive status is larger than or equal to this value

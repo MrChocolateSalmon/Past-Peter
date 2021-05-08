@@ -11,5 +11,5 @@ public class CommandInfo {
         this.pos = pos;
     }
 
-    public enum CommandID { wait, move, pickup, drop, interact; }
+    public enum CommandID { wait, move, pickup, drop, interact, use; }
 }

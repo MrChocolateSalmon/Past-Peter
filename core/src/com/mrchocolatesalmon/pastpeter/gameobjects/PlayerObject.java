@@ -104,6 +104,14 @@ public class PlayerObject {
         positionArray.get(timeID)[time].holding = obj; //Carry this new object
     }
 
+    public void useItem(TimeID timeID, int time, Vector2 targetPos){
+        IngameObject obj = getHolding(timeID, time);
+
+        if (obj != null) {
+            obj.sendInterrupt(new Interrupt(Interrupt.InterruptID.use, this, targetPos), timeID, time);
+        }
+    }
+
     public void timeUpdate(TimeID timeID, int time, TimeID previousTimeID){
 
         TimePosition[] currentPositions = positionArray.get(timeID);
@@ -132,6 +140,9 @@ public class PlayerObject {
                     break;
                 case drop:
                     drop(timeID, time);
+                    break;
+                case use:
+                    useItem(timeID, time, command.pos);
                     break;
             }
 
