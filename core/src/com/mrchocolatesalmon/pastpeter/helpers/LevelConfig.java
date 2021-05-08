@@ -95,7 +95,7 @@ public class LevelConfig {
                                     String[] params = line.trim().split(":");
                                     String objectName = params[0];
 
-                                    ObjectDef definition = GameData.objectDefinitions.get(objectName).CloneObjectDef();
+                                    ObjectDef definition = GameData.getObjectDefinition(objectName);
 
                                     Gdx.app.log("LevelConfig", "Creating: " + objectName + " at " + x + "," + y);
 
@@ -109,9 +109,7 @@ public class LevelConfig {
                                         definition.Parameter(parameter_desc[0], Integer.parseInt(parameter_desc[1]));
                                     }
 
-                                    IngameObject obj = new IngameObject(new Vector2(x,y), objectName, definition, newLevel);
-
-                                    newLevel.AddObject(obj);
+                                    newLevel.AddObject(new Vector2(x,y), objectName, definition);
                                 }
                             }
                         }

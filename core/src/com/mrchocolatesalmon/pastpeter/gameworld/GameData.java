@@ -11,6 +11,7 @@ import com.mrchocolatesalmon.pastpeter.screens.*;
 import javax.management.ReflectionException;
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedList;
 
@@ -35,6 +36,11 @@ public class GameData {
     public Level[] levels;
 
     public static HashMap<String, ObjectDef> objectDefinitions = new HashMap<String, ObjectDef>();
+    public static LinkedList<String> objectNameStored;
+
+    public static ObjectDef getObjectDefinition(String objectName){
+        return GameData.objectDefinitions.get(objectName).CloneObjectDef();
+    }
 
     public GameData(Game screenControl){
         //Change Log
@@ -81,6 +87,11 @@ public class GameData {
     }
 
     void SetObjectDefinitions(){
+
+        //Lookup table for quick reference to an object name for spawning by another object
+        objectNameStored = new LinkedList<String>( Arrays.asList("leaf") );
+
+        //Object Definitions for creating new objects in a level
         objectDefinitions.put("axe", new ObjectDef().Parameter("gravity", 1).Parameter("pickup", 1)
                             .Parameter("cut", 1).Animation(1, "axe"));
 
@@ -109,7 +120,8 @@ public class GameData {
 
         objectDefinitions.put("lever", new ObjectDef().Parameter("interact",1));
 
-        objectDefinitions.put("leaf", new ObjectDef().Parameter("wall",1));
+        objectDefinitions.put("leaf", new ObjectDef().Parameter("wall",3).Parameter("grow_state", 1)
+                                .AnimationRange(3, 6, "leaf"));
 
         objectDefinitions.put("openstone", new ObjectDef().Parameter("wall",1));
 
@@ -129,7 +141,8 @@ public class GameData {
         objectDefinitions.put("tallgrass", new ObjectDef());
 
         objectDefinitions.put("tree", new ObjectDef().Parameter("wall",3).Parameter("grow_state", 1).Parameter("cut", 2)
-                                .Animation(-1, "tree_cut").Animation(2, "shrub").Animation(3, 4, "tree"));
+                                .Connection("leaf", 0, -1, true).Animation(-2, "tree_cut").Animation(2, "shrub")
+                                .Animation(3, 4, "tree"));
 
         objectDefinitions.put("vines", new ObjectDef().Parameter("ladder",1));
 

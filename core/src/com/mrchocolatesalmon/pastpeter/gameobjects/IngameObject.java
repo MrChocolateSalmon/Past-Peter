@@ -33,6 +33,8 @@ public class IngameObject {
 
     protected Vector2 startPast;
 
+    protected IngameObject connectedObject;
+
     public IngameObject(Vector2 startPast, String nameID, ObjectDef definition, Level level){
 
         this.nameID = nameID;
@@ -41,6 +43,21 @@ public class IngameObject {
 
         this.startPast = startPast;
         Reset();
+
+        int connectionID = parameterValue("connectionID");
+        if (connectionID >= 0){
+            String connectionName = GameData.objectNameStored.get(connectionID);
+            Vector2 connectionPos = new Vector2(startPast.x + parameterValue("connectionOffsetX"), startPast.y + parameterValue("connectionOffsetY"));
+            boolean linkedAliveStatus = (parameterValue("connectionAliveLinked") == 1);
+
+            ObjectDef connectionDef = GameData.getObjectDefinition(connectionName);
+
+            if (linkedAliveStatus){ connectionDef.Parameter("start_state", parameterValue("start_state")); }
+
+            connectedObject = level.AddObject(connectionPos, connectionName, connectionDef);
+
+            Gdx.app.log("IngameObject", nameID + ": connection of " + connectionName);
+        }
     }
 
     public void Reset(){
@@ -173,6 +190,10 @@ public class IngameObject {
                                 break;
                         }
                         break;
+
+                    case destroy:
+                        currentPosition.aliveStatus = 0;
+                        break;
                 }
 
                 interrupts.get(timeID)[time] = null;
@@ -181,6 +202,10 @@ public class IngameObject {
             //Continue processing this time point
             if (currentPosition.aliveStatus > 0){
                 //TODO: Check other parameters and execute accordingly
+            } else {
+                if (connectedObject != null) {
+                    connectedObject.sendInterrupt(new Interrupt(Interrupt.InterruptID.destroy, null), timeID, time);
+                }
             }
 
         } else {
@@ -198,7 +223,10 @@ public class IngameObject {
             }
         }
 
-//        if (nameID.equals("axe")){Gdx.app.log("IngameObject", "axe: " + timeID.toString() + " " + String.valueOf(time) + ", a=" + currentPosition.aliveStatus); }
+        if (nameID.equals("leaf")){
+            Gdx.app.log("IngameObject", nameID + ": " + timeID.toString() + " " + String.valueOf(time) + ", a=" + currentPosition.aliveStatus);
+            Gdx.app.log("IngameObject", nameID + ": " + timeID.toString() + " " + String.valueOf(time) + ", pos=" + currentPosition.x + "," + currentPosition.y);
+        }
     }
 
     public boolean canUseHere(Vector2 pos, TimeID timeID, int time){

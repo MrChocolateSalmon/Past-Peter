@@ -70,6 +70,7 @@ public class AssetLoader {
 
         TextureRegion temp;
 
+        objectTextureMap.put("leaf", makeAnimation(objectTexture, 0, 1, 1, 0f, PlayMode.NORMAL));
         objectTextureMap.put("tree", makeAnimation(objectTexture, 0, 2, 1, 0f, PlayMode.NORMAL));
         objectTextureMap.put("tree_cut", makeAnimation(objectTexture, 0, 3, 1, 0f, PlayMode.NORMAL));
         objectTextureMap.put("shrub", makeAnimation(objectTexture, 0, 4, 1, 0f, PlayMode.NORMAL));

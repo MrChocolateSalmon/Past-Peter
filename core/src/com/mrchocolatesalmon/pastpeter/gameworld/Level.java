@@ -1,6 +1,7 @@
 package com.mrchocolatesalmon.pastpeter.gameworld;
 
 import com.badlogic.gdx.math.Vector2;
+import com.mrchocolatesalmon.pastpeter.datastructures.ObjectDef;
 import com.mrchocolatesalmon.pastpeter.datastructures.TimePosition;
 import com.mrchocolatesalmon.pastpeter.enums.BackgroundType;
 import com.mrchocolatesalmon.pastpeter.enums.TimeID;
@@ -47,8 +48,11 @@ public class Level {
         resetLevel();
     }
 
-    public void AddObject(IngameObject obj){
+    public IngameObject AddObject(Vector2 pos, String objectName, ObjectDef definition){
+        IngameObject obj = new IngameObject(pos, objectName, definition, this);
         objects.add(obj);
+
+        return obj;
     }
 
     public void resetLevel(){

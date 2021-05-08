@@ -29,5 +29,5 @@ public class Interrupt {
         this.useParameter = useParameter;
     }
 
-    public enum InterruptID { move, pickup, drop, use, itemUsedOn, interact, update, destroy; }
+    public enum InterruptID { move, pickup, drop, use, itemUsedOn, interact, destroy; }
 }
