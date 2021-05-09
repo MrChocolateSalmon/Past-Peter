@@ -100,6 +100,8 @@ public class IngameObject {
 
         TimePosition position = positionArray.get(level.getCurrentTimeID())[level.getCurrentTime()];
 
+        //if (nameID == "leaf" && position.aliveStatus <= 3){ Gdx.app.log("IngameObject", "Leaf: " + level.getCurrentTime() + ", " + position.aliveStatus); }
+
         if (position.aliveStatus == 0 || !definition.textureMap.containsKey(position.aliveStatus)){ return; }
 
         String animName = definition.textureMap.get(position.aliveStatus);
@@ -133,11 +135,12 @@ public class IngameObject {
             //Handle any interrupts for this time point
             if (interrupt != null){
 
+                Gdx.app.log("IngameObject", nameID + ": processing " + interrupt.interruptID.toString() + " interrupt");
+
                 switch (interrupt.interruptID){
                     case pickup:
                         interrupt.caller.hold(this, timeID, time); //Confirm pickup with player
                         currentPosition.aliveStatus = 0; //Set alive status to 0 to hide
-                        //Gdx.app.log("IngameObject", nameID + ": processing pickup interrupt");
                         break;
 
                     case drop:
@@ -204,6 +207,7 @@ public class IngameObject {
                 //TODO: Check other parameters and execute accordingly
             } else {
                 if (connectedObject != null) {
+                    Gdx.app.log("IngameObject", nameID + ": sending destroy interrupt");
                     connectedObject.sendInterrupt(new Interrupt(Interrupt.InterruptID.destroy, null), timeID, time);
                 }
             }

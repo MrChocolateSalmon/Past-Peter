@@ -124,6 +124,7 @@ public class PlayerObject {
             currentPosition.copyValues(previousPosition);
 
             CommandInfo command = commands.get(timeID)[time];
+            if (time > level.getCurrentTime(timeID)){command.commandID = CommandInfo.CommandID.wait;}
 
             switch(command.commandID){
                 case wait:

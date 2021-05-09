@@ -68,16 +68,23 @@ public class InGameScreen implements Screen, ScreenMethods {
 
         TimePosition playerPosition = activePlayer.getPosition(timeID, time);
 
+        //======================
+        //Process player inputs
+        //======================
         if (gameData.inputs.keysPressed[Input.Keys.NUM_1]){
+            usingItem = null;
             currentLevel.setCurrentTimeID(TimeID.past);
             sceneUpdate();
         } else if (gameData.inputs.keysPressed[Input.Keys.NUM_2]){
+            usingItem = null;
             currentLevel.setCurrentTimeID(TimeID.present);
             sceneUpdate();
         } else if (gameData.inputs.keysPressed[Input.Keys.NUM_3]){
+            usingItem = null;
             currentLevel.setCurrentTimeID(TimeID.future);
             sceneUpdate();
         } else if (gameData.inputs.keysPressed[Input.Keys.BACKSPACE]){
+            usingItem = null;
             decrementTime();
         }
 
@@ -164,7 +171,8 @@ public class InGameScreen implements Screen, ScreenMethods {
     private void decrementTime(){
         currentLevel.decrementTime();
 
-        sceneUpdate();
+        //sceneUpdate();
+        timeUpdateAll(currentLevel.getCurrentTimeID());
     }
 
     //Update all objects and players for the new time element and all future events
@@ -174,6 +182,8 @@ public class InGameScreen implements Screen, ScreenMethods {
 
         Gdx.app.log("InGameScreen", "======================");
         Gdx.app.log("InGameScreen", "timeUpdateAll() start");
+
+        int iterations = 4; //Number of chain actions in a single turn (that can be guarenteed to all be called)
 
         //Select current time id and all time ids in the future
         if (startID == TimeID.past){
@@ -193,19 +203,23 @@ public class InGameScreen implements Screen, ScreenMethods {
             int tempCurrentTime = currentLevel.getCurrentTime(currentTimeID);
             for (int t = (u==0)?tempCurrentTime:0; t < tempCurrentTime + GameData.FILLERSIZE; t++) {
 
-                for (int i = 0; i < currentLevel.players.size(); i++) {
-                    currentLevel.players.get(i).timeUpdate(currentTimeID, t, previousTimeID);
-                }
+                //Repeats for a certain number of iterations so all interactions/interrupts can be processed
+                for (int it = 0; it < iterations; it++) {
 
-                for (int i = 0; i < currentLevel.objects.size(); i++) {
-                    currentLevel.objects.get(i).timeUpdate(currentTimeID, t, previousTimeID);
+                    for (int i = 0; i < currentLevel.players.size(); i++) {
+                        currentLevel.players.get(i).timeUpdate(currentTimeID, t, previousTimeID);
+                    }
 
+                    for (int i = 0; i < currentLevel.objects.size(); i++) {
+                        currentLevel.objects.get(i).timeUpdate(currentTimeID, t, previousTimeID);
+                    }
                 }
             }
         }
 
         sceneUpdate(); //Update the scene when finished updating all objects and players
 
+        Gdx.app.log("InGameScreen", "current time for " + startID.toString() + " = " + currentLevel.getCurrentTime(startID));
         Gdx.app.log("InGameScreen", "timeUpdateAll() end");
         Gdx.app.log("InGameScreen", "======================");
     }
