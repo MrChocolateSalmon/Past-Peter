@@ -26,6 +26,7 @@ public class PlayerObject {
     public HashMap<TimeID, HashMap<String, String>> textureMap = new HashMap<TimeID, HashMap<String, String>>();
 
     protected Level level;
+    protected HashMap<TimeID, Vector2> targets = new HashMap<TimeID, Vector2>();
 
     public PlayerObject(Vector2 startPast, Vector2 startPresent, Vector2 startFuture, Vector2 endFuture,
                             PlayerID id, Level level){
@@ -69,6 +70,19 @@ public class PlayerObject {
         }
         positionArray.put(TimeID.future, positions);
         commands.put(TimeID.future, commandsArray);
+
+        targets.put(TimeID.past, startPresent);
+        targets.put(TimeID.present, startFuture);
+        targets.put(TimeID.future, endFuture);
+    }
+
+    public boolean isAtTarget(TimeID timeID){
+        TimePosition position = getPosition(timeID, level.getCurrentTime(timeID));
+        Vector2 targetPosition = targets.get(timeID);
+
+        if (position.aliveStatus <= 0){ return false; }
+
+        return position.x == targetPosition.x && position.y == targetPosition.y;
     }
 
     public void setCommand(TimeID timeID, int time, CommandInfo command){
@@ -159,6 +173,7 @@ public class PlayerObject {
 
         TimeID timeID = level.getCurrentTimeID();
         TimePosition position = getPosition(timeID, level.getCurrentTime());
+        Vector2 targetPosition = targets.get(timeID);
 
         if (!textureMap.get(timeID).containsKey("idle")){ return; }
 
@@ -171,6 +186,10 @@ public class PlayerObject {
             //Gdx.app.log("PlayerObject", "anim = " + anim.toString());
 
             batcher.draw((TextureRegion) anim.getKeyFrame(level.levelAge), position.x * GameData.GAMESIZE, position.y * GameData.GAMESIZE);
+
+            Animation endPointAnim = AssetLoader.getPlayerTexture(textureMap.get(timeID).get("endpoint"));
+
+            batcher.draw((TextureRegion) endPointAnim.getKeyFrame(level.levelAge), targetPosition.x * GameData.GAMESIZE, targetPosition.y * GameData.GAMESIZE);
         }
     }
 

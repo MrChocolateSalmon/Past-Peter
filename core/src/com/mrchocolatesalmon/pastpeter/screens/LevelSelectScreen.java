@@ -5,6 +5,8 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.math.Vector;
 import com.badlogic.gdx.math.Vector2;
+import com.mrchocolatesalmon.pastpeter.enums.BackgroundType;
+import com.mrchocolatesalmon.pastpeter.enums.TimeID;
 import com.mrchocolatesalmon.pastpeter.gameworld.GameData;
 import com.mrchocolatesalmon.pastpeter.gameworld.Level;
 import com.mrchocolatesalmon.pastpeter.helpers.AssetLoader;
@@ -16,8 +18,6 @@ public class LevelSelectScreen implements Screen, ScreenMethods {
     Vector2[] levelButtons;
 
     Level selectedLevel;
-
-
 
     boolean displayLevelInfo = false;
 
@@ -88,7 +88,7 @@ public class LevelSelectScreen implements Screen, ScreenMethods {
 
     @Override
     public void render(float delta) {
-        gameData.renderer.renderStart(1, delta, AssetLoader.bgPast);
+        gameData.renderer.renderStart(1, delta, BackgroundType.sky, TimeID.past);
 
         gameData.renderer.renderLevelButtons(levelButtons);
 

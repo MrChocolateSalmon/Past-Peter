@@ -122,6 +122,8 @@ public class Level {
         backType = backgroundType;
     }
 
+    public BackgroundType GetBackground(){ return backType; }
+
     public LinkedList<IngameObject> getObjectsAt(TimeID timeID, int time, Vector2 pos) {
         LinkedList<IngameObject> objs = new LinkedList<IngameObject>();
 

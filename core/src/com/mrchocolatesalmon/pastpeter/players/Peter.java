@@ -14,5 +14,9 @@ public class Peter extends PlayerObject {
         textureMap.get(TimeID.past).put("idle", "peter_past_idle");
         textureMap.get(TimeID.present).put("idle", "peter_present_idle");
         textureMap.get(TimeID.future).put("idle", "peter_future_idle");
+
+        textureMap.get(TimeID.past).put("endpoint", "peter_past_endpoint");
+        textureMap.get(TimeID.present).put("endpoint", "peter_present_endpoint");
+        textureMap.get(TimeID.future).put("endpoint", "peter_future_endpoint");
     }
 }

@@ -6,6 +6,8 @@ import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Vector2;
+import com.mrchocolatesalmon.pastpeter.enums.BackgroundType;
+import com.mrchocolatesalmon.pastpeter.enums.TimeID;
 import com.mrchocolatesalmon.pastpeter.gameobjects.IngameObject;
 import com.mrchocolatesalmon.pastpeter.gameobjects.PlayerObject;
 import com.mrchocolatesalmon.pastpeter.helpers.AssetLoader;
@@ -30,8 +32,33 @@ public class GameRenderer {
         batcher.setProjectionMatrix(getCam().combined);
     }
 
-    public void renderStart(int screen, float delta, TextureRegion bg){
+    public void renderStart(int screen, float delta, BackgroundType bgType, TimeID timeID){
         batcher.begin();
+
+        TextureRegion bg = AssetLoader.bgPast;
+
+        if (bgType == BackgroundType.sky){
+            switch (timeID){
+                case present:
+                    bg = AssetLoader.bgPresent;
+                    break;
+                case future:
+                    bg = AssetLoader.bgFuture;
+                    break;
+            }
+        } else if (bgType == BackgroundType.wooden){
+            switch (timeID){
+                case past:
+                    bg = AssetLoader.bgPresent;
+                    break;
+                case present:
+                    bg = AssetLoader.bgPresent;
+                    break;
+                case future:
+                    bg = AssetLoader.bgFuture;
+                    break;
+            }
+        }
 
         //Draw current background
         batcher.draw(bg, 0, 0, gameData.GAMEWIDTH * gameData.GAMESIZE, gameData.GAMEHEIGHT * gameData.GAMESIZE);

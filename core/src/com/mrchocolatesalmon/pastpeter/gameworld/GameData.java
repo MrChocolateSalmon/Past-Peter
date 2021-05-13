@@ -27,6 +27,7 @@ public class GameData {
 
     public Screen levelSelectScreen, levelEditorScreen;
     public InGameScreen ingameScreen;
+    public WinScreen winScreen;
 
     public GameRenderer renderer;
     public InputHandler inputs = new InputHandler(this);
@@ -83,6 +84,7 @@ public class GameData {
         //Initialize Screens
         levelSelectScreen = new LevelSelectScreen(this, screenControl);
         ingameScreen = new InGameScreen(this, screenControl);
+        winScreen = new WinScreen(this, screenControl);
         levelEditorScreen = new LevelEditorScreen(this, screenControl);
     }
 

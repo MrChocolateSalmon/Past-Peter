@@ -14,6 +14,8 @@ import com.mrchocolatesalmon.pastpeter.gameworld.GameData;
 import com.mrchocolatesalmon.pastpeter.gameworld.Level;
 import com.mrchocolatesalmon.pastpeter.helpers.AssetLoader;
 
+import java.util.HashMap;
+
 public class InGameScreen implements Screen, ScreenMethods {
     Game screenControl;
     GameData gameData;
@@ -52,7 +54,7 @@ public class InGameScreen implements Screen, ScreenMethods {
 
         gameUpdate();
 
-        gameData.renderer.renderStart(1, delta, AssetLoader.bgPast);
+        gameData.renderer.renderStart(1, delta, currentLevel.GetBackground(), currentLevel.getCurrentTimeID());
 
         gameData.renderer.renderLevel(currentLevel);
 
@@ -219,9 +221,41 @@ public class InGameScreen implements Screen, ScreenMethods {
 
         sceneUpdate(); //Update the scene when finished updating all objects and players
 
-        Gdx.app.log("InGameScreen", "current time for " + startID.toString() + " = " + currentLevel.getCurrentTime(startID));
+        checkWin();
+
+        //Gdx.app.log("InGameScreen", "current time for " + startID.toString() + " = " + currentLevel.getCurrentTime(startID));
         Gdx.app.log("InGameScreen", "timeUpdateAll() end");
         Gdx.app.log("InGameScreen", "======================");
+    }
+
+    private void checkWin(){
+
+        HashMap<TimeID, Boolean> timeComplete = new HashMap<TimeID, Boolean>();
+
+        timeComplete.put(TimeID.past, true);
+        timeComplete.put(TimeID.present, true);
+        timeComplete.put(TimeID.future, true);
+
+        boolean allComplete = true;
+
+        for (TimeID timeID : timeComplete.keySet()){
+
+            for (int i = 0; i < currentLevel.players.size(); i++){
+                if (currentLevel.players.get(i).isAtTarget(timeID) == false){
+                    timeComplete.put(timeID, false);
+                }
+            }
+
+            Gdx.app.log("InGameScreen",  timeID.toString() + " complete = " + timeComplete.get(timeID));
+
+            if (timeComplete.get(timeID) == false){ allComplete = false; }
+
+        }
+
+        if (allComplete){
+            gameData.winScreen.loadLevelStats(currentLevel);
+            screenControl.setScreen(gameData.winScreen);
+        }
     }
 
     // Update the scene based on the new positions and states

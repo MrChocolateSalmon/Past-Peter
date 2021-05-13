@@ -93,6 +93,10 @@ public class AssetLoader {
         playerTextureMap.put("peter_past_idle", makeAnimation(peterTexture, 0, 1, 1, 0.2f, PlayMode.LOOP));
         playerTextureMap.put("peter_present_idle", makeAnimation(peterTexture, 1, 1, 1, 0.2f, PlayMode.LOOP));
         playerTextureMap.put("peter_future_idle", makeAnimation(peterTexture, 2, 1, 1, 0.2f, PlayMode.LOOP));
+
+        playerTextureMap.put("peter_past_endpoint", makeAnimation(peterTexture, 0, 4, 1, 0.2f, PlayMode.LOOP));
+        playerTextureMap.put("peter_present_endpoint", makeAnimation(peterTexture, 1, 4, 1, 0.2f, PlayMode.LOOP));
+        playerTextureMap.put("peter_future_endpoint", makeAnimation(peterTexture, 2, 4, 1, 0.2f, PlayMode.LOOP));
     }
 
     private static Animation makeAnimation(Texture tex, int y, int startX, int count, float speed, PlayMode playMode) {
