@@ -2,6 +2,7 @@ package com.mrchocolatesalmon.pastpeter.screens;
 
 import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.Input;
 import com.badlogic.gdx.Screen;
 import com.mrchocolatesalmon.pastpeter.enums.BackgroundType;
 import com.mrchocolatesalmon.pastpeter.enums.TimeID;
@@ -33,13 +34,19 @@ public class WinScreen implements Screen, ScreenMethods {
     @Override
     public void render(float delta) {
 
-        gameData.renderer.renderStart(0, delta, BackgroundType.sky, displayLevel.getCurrentTimeID());
+        gameData.renderer.renderStart(delta, BackgroundType.sky, displayLevel.getCurrentTimeID());
 
-        gameData.renderer.renderLevel(displayLevel);
-
-        gameData.renderer.renderLevelInfo(displayLevel); //TODO: Debug. Replace with rendering win screen
+        gameData.renderer.renderWinScreen(displayLevel);
 
         gameData.renderer.renderEnd();
+
+        if (gameData.inputs.keysPressed[Input.Keys.BACKSPACE]) {
+            gameData.ingameScreen.currentLevel.resetLevel();
+            screenControl.setScreen(gameData.ingameScreen);
+        } else if (gameData.inputs.keysPressed[Input.Keys.ENTER]) {
+            gameData.ingameScreen.currentLevel.resetLevel();
+            screenControl.setScreen(gameData.levelSelectScreen);
+        }
 
         gameData.inputs.resetKeysPressed();
     }

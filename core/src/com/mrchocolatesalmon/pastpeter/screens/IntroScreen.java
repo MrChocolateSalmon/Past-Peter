@@ -30,7 +30,8 @@ public class IntroScreen implements Screen, ScreenMethods {
             screenControl.setScreen(gameData.levelSelectScreen);
         }
 
-        gameData.renderer.renderStart(0, delta, BackgroundType.sky, TimeID.past);
+        gameData.renderer.renderStart(delta, BackgroundType.sky, TimeID.past);
+        gameData.renderer.renderTitle();
         gameData.renderer.renderEnd();
 
         gameData.inputs.resetKeysPressed();

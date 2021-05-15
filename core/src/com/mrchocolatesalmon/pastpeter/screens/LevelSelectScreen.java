@@ -2,6 +2,7 @@ package com.mrchocolatesalmon.pastpeter.screens;
 
 import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.Input;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.math.Vector;
 import com.badlogic.gdx.math.Vector2;
@@ -62,8 +63,6 @@ public class LevelSelectScreen implements Screen, ScreenMethods {
                 if (mousex >= buttonPos.x && mousey >= buttonPos.y && mousex <= buttonPos.x + gameData.GAMESIZE && mousey <= buttonPos.y + gameData.GAMESIZE) {
                     displayLevelInfo = true;
                     selectedLevel = gameData.levels[i];
-
-                    startLevel(selectedLevel);
                 }
             }
         }
@@ -88,12 +87,19 @@ public class LevelSelectScreen implements Screen, ScreenMethods {
 
     @Override
     public void render(float delta) {
-        gameData.renderer.renderStart(1, delta, BackgroundType.sky, TimeID.past);
+        gameData.renderer.renderStart(delta, BackgroundType.sky, TimeID.past);
 
         gameData.renderer.renderLevelButtons(levelButtons);
 
         if (displayLevelInfo) {
             gameData.renderer.renderLevelInfo(selectedLevel);
+
+            if (gameData.inputs.keysPressed[Input.Keys.ENTER]){
+                displayLevelInfo = false;
+                startLevel(selectedLevel);
+            } else if (gameData.inputs.keysPressed[Input.Keys.ESCAPE] || gameData.inputs.keysPressed[Input.Keys.BACKSPACE]){
+                displayLevelInfo = false;
+            }
         }
 
         gameData.renderer.renderEnd();

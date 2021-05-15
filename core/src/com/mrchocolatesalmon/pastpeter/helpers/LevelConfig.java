@@ -34,7 +34,7 @@ public class LevelConfig {
     static Level ConfigNewLevel(GameData gameData, int index, String levelName){
         Level newLevel = new Level(gameData, index);
 
-        Gdx.app.log("LevelConfig", levelName);
+        Gdx.app.log("LevelConfig", "*** " + levelName);
 
         FileHandle file = Gdx.files.internal("levels/" + levelName + ".txt");
         if (file != null){
@@ -43,12 +43,16 @@ public class LevelConfig {
             try {
                 String line = null;
 
+                line = lineReader.readLine();
+
+                newLevel.name = (index+1) + " - " + line;
+
+                Gdx.app.log("LevelConfig", "New Level Name = " + newLevel.name);
+
                 do {
                     //Read next line of level file
                     line = lineReader.readLine();
                     if (line == null){ break; }
-
-                    newLevel.name = (index+1) + " - " + line;
 
                     //Process the line
                     if (line.startsWith("settings")){

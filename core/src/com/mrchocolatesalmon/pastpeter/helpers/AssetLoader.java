@@ -11,9 +11,10 @@ import com.mrchocolatesalmon.pastpeter.gameworld.GameData;
 import java.util.HashMap;
 
 public class AssetLoader {
-    private static Texture backgroundTexture, logoTexture, miscTexture;
+    private static Texture backgroundTexture, logoTexture, miscTexture, uiTexture;
     public static TextureRegion bgPast, bgPresent, bgFuture, logo;
     public static TextureRegion levelBtn;
+    public static TextureRegion winBorder;
 
     private static Texture objectTexture;
     private static HashMap<String, Animation> objectTextureMap;
@@ -60,6 +61,11 @@ public class AssetLoader {
         miscTexture.setFilter(TextureFilter.Nearest, TextureFilter.Nearest);
         levelBtn = new TextureRegion(miscTexture, 96, 0, 32, 32);
         levelBtn.flip(false, true);
+
+        uiTexture = new Texture(Gdx.files.internal("data/uitexture.png"));
+        uiTexture.setFilter(TextureFilter.Nearest, TextureFilter.Nearest);
+        winBorder = new TextureRegion(uiTexture, 0, 0, 160, 256);
+        winBorder.flip(false, true);
     }
 
     private static void loadIngameAssets() {

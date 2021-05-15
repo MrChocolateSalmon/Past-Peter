@@ -3,6 +3,8 @@ package com.mrchocolatesalmon.pastpeter.screens;
 import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Screen;
+import com.mrchocolatesalmon.pastpeter.enums.BackgroundType;
+import com.mrchocolatesalmon.pastpeter.enums.TimeID;
 import com.mrchocolatesalmon.pastpeter.gameworld.GameData;
 
 public class LevelEditorScreen implements Screen, ScreenMethods {
@@ -23,6 +25,7 @@ public class LevelEditorScreen implements Screen, ScreenMethods {
     @Override
     public void render(float delta) {
 
+        gameData.renderer.renderStart(delta, BackgroundType.sky, TimeID.present);
 
         gameData.inputs.resetKeysPressed();
     }

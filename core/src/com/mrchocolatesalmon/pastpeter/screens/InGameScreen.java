@@ -54,7 +54,7 @@ public class InGameScreen implements Screen, ScreenMethods {
 
         gameUpdate();
 
-        gameData.renderer.renderStart(1, delta, currentLevel.GetBackground(), currentLevel.getCurrentTimeID());
+        gameData.renderer.renderStart(delta, currentLevel.GetBackground(), currentLevel.getCurrentTimeID());
 
         gameData.renderer.renderLevel(currentLevel);
 

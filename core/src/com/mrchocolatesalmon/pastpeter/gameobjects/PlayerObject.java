@@ -76,6 +76,10 @@ public class PlayerObject {
         targets.put(TimeID.future, endFuture);
     }
 
+    public String playerIDToString(){
+        return playerID.toString();
+    }
+
     public boolean isAtTarget(TimeID timeID){
         TimePosition position = getPosition(timeID, level.getCurrentTime(timeID));
         Vector2 targetPosition = targets.get(timeID);
