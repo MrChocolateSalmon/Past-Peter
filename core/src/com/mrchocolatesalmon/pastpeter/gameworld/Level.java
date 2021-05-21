@@ -124,7 +124,7 @@ public class Level {
 
     public BackgroundType GetBackground(){ return backType; }
 
-    public LinkedList<IngameObject> getObjectsAt(TimeID timeID, int time, Vector2 pos) {
+    public LinkedList<IngameObject> getObjectsAt(TimeID timeID, int time, Vector2 pos, String[] names) {
         LinkedList<IngameObject> objs = new LinkedList<IngameObject>();
 
         for (int i = 0; i < objects.size(); i++){
@@ -132,9 +132,30 @@ public class Level {
 
             TimePosition timePos = obj.getTimePosition(timeID, time);
 
-            if (timePos.x == pos.x && timePos.y == pos.y){ objs.add(obj); }
+            if (timePos.x == pos.x && timePos.y == pos.y){
+
+                boolean found = false;
+
+                if (names == null || names.length == 0){
+                    found = true;
+
+                } else {
+
+                    for (String tempName : names){
+                        if (tempName.equals(obj.getNameID())){ found = true; break; }
+                    }
+                }
+
+                if (found){
+                    objs.add(obj);
+                }
+            }
         }
 
         return objs;
+    }
+
+    public LinkedList<IngameObject> getObjectsAt(TimeID timeID, int time, Vector2 pos) {
+        return getObjectsAt(timeID, time, pos, null);
     }
 }

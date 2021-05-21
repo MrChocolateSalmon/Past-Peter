@@ -204,7 +204,64 @@ public class IngameObject {
 
             //Continue processing this time point
             if (currentPosition.aliveStatus > 0){
+
+                boolean automaticAction = false;
+
+                //IngameObject wallBelow = level.findGameobjectWithParameter("wall", new Vector2(currentPosition.x, currentPosition.y+1), timeID, time);
+
                 //TODO: Check other parameters and execute accordingly
+
+                //And now perform any npcAction, if nothing was already done (such as falling)?
+                int numberOfNPCPriorities = definition.npcPriorities.size();
+                if (!automaticAction && definition.npcPriorities.size() > 0){
+                    for (int i = 0 ;i < numberOfNPCPriorities; i++){
+                        ObjectDef.NPCDef npcDef = definition.npcPriorities.get(i);
+
+                        boolean used = false;
+
+                        switch(npcDef.goal){
+                            case moveDirection:
+                                currentPosition.x += npcDef.targetVector.x;
+                                currentPosition.y += npcDef.targetVector.y;
+                                used = true;
+                                break;
+
+                            case flyDownTo:
+                                //TODO: Search through list, and if that object is below, move down to it
+                                int x = currentPosition.x;
+                                for (int y = currentPosition.y+1; y < GameData.GAMEHEIGHT; y++){
+
+                                    Vector2 checkPosition = new Vector2(x,y);
+
+                                    for (String n : npcDef.targetNames){
+                                        LinkedList<IngameObject> targetsFound = level.getObjectsAt(timeID, time, checkPosition, npcDef.targetNames);
+
+                                        for (int t = targetsFound.size() - 1; t >= 0; t--){
+                                            if (targetsFound.get(t).getTimePosition(timeID, time).aliveStatus < npcDef.minAliveStatus){
+                                                targetsFound.remove(t);
+                                            }
+                                        }
+
+                                        if (targetsFound.size() > 0){
+
+                                            if (y > currentPosition.y + 1){
+                                                currentPosition.y += 1; //Move down if not already on top of the object
+                                            }
+
+                                            used = true;
+                                            break;
+                                        }
+                                    }
+
+                                    if (used) { break; }
+                                }
+                                break;
+                        }
+
+                        if (used){ break; }
+                    }
+                }
+
             } else {
                 if (connectedObject != null) {
                     Gdx.app.log("IngameObject", nameID + ": sending destroy interrupt");
@@ -212,7 +269,7 @@ public class IngameObject {
                 }
             }
 
-        } else {
+        } else if (timeID != TimeID.past){
 
             //======= Start of timeID =======
             TimePosition previousPosition = earlierTimePositions[level.getCurrentTime(previousTimeID) + GameData.FILLERSIZE - 1];

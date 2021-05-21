@@ -1,9 +1,11 @@
 package com.mrchocolatesalmon.pastpeter.datastructures;
 
 import com.badlogic.gdx.math.Vector2;
+import com.mrchocolatesalmon.pastpeter.enums.NPCGoal;
 import com.mrchocolatesalmon.pastpeter.gameworld.GameData;
 
 import java.util.HashMap;
+import java.util.LinkedList;
 
 public class ObjectDef {
 
@@ -11,6 +13,7 @@ public class ObjectDef {
 
     public HashMap<Integer, String> textureMap = new HashMap<Integer, String>();
 
+    public LinkedList<NPCDef> npcPriorities = new LinkedList<NPCDef>();
 
     public ObjectDef(){
         parameters.put("start_state", 1);
@@ -42,6 +45,12 @@ public class ObjectDef {
         return this;
     }
 
+    public ObjectDef NPC(NPCDef npcDef){
+        npcPriorities.add(npcDef);
+
+        return this;
+    }
+
     public ObjectDef Connection(String connectionName, int offsetX, int offsetY, boolean connectionAliveLinked){
 
         if (GameData.objectNameStored.contains(connectionName)){
@@ -66,8 +75,39 @@ public class ObjectDef {
 
         c.parameters = (HashMap<String, Integer>)parameters.clone();
         c.textureMap = (HashMap<Integer, String>)textureMap.clone();
+        c.npcPriorities = (LinkedList<NPCDef>)npcPriorities.clone();
 
         return c;
+    }
+
+    public static class NPCDef {
+        public NPCGoal goal;
+        public Vector2 targetVector;
+        public String[] targetNames;
+
+        public int minAliveStatus = 0;
+
+        public NPCDef set_moveToTargets(String[] targets){
+            goal = NPCGoal.moveTo;
+            targetNames = targets;
+
+            return this;
+        }
+
+        public NPCDef set_moveDirection(Vector2 dir){
+            goal = NPCGoal.moveDirection;
+            targetVector = dir;
+
+            return this;
+        }
+
+        public NPCDef set_flyDownTo(String[] targets, int minAliveStatus){
+            goal = NPCGoal.flyDownTo;
+            targetNames = targets;
+            this.minAliveStatus = minAliveStatus;
+
+            return this;
+        }
     }
 }
 

@@ -4,6 +4,7 @@ import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.files.FileHandle;
+import com.badlogic.gdx.math.Vector2;
 import com.mrchocolatesalmon.pastpeter.datastructures.ObjectDef;
 import com.mrchocolatesalmon.pastpeter.helpers.*;
 import com.mrchocolatesalmon.pastpeter.screens.*;
@@ -18,8 +19,8 @@ import java.util.LinkedList;
 public class GameData {
 
     public final static int GAMESIZE = 64;
-    public final int GAMEHEIGHT = 9;
-    public final int GAMEWIDTH = 11;
+    public final static int GAMEHEIGHT = 9;
+    public final static int GAMEWIDTH = 11;
     public final int CAMWIDTH = GAMEWIDTH * GAMESIZE, CAMHEIGHT = GAMEHEIGHT * GAMESIZE;
     public final float CAMRATIO = (float) CAMWIDTH / CAMHEIGHT;
 
@@ -100,7 +101,9 @@ public class GameData {
         objectDefinitions.put("builder", new ObjectDef().Parameter("gravity", 1).Parameter("npc", 1));
 
         objectDefinitions.put("bird", new ObjectDef().Parameter("pickup", 1).Parameter("npc",1)
-                                .Animation(1, "bird_stand").Animation(2, "bird_fly"));
+                                .Animation(1, "bird_stand").Animation(2, "bird_fly")
+                                .NPC(new ObjectDef.NPCDef().set_flyDownTo(new String[] {"leaf"}, 3))
+                                .NPC(new ObjectDef.NPCDef().set_moveDirection(new Vector2(-1, 0))));
 
         objectDefinitions.put("carrot", new ObjectDef().Parameter("pickup", 1));
 
