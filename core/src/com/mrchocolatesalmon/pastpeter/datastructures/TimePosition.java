@@ -1,5 +1,6 @@
 package com.mrchocolatesalmon.pastpeter.datastructures;
 
+import com.badlogic.gdx.math.Vector2;
 import com.mrchocolatesalmon.pastpeter.gameobjects.IngameObject;
 
 //Stores the details of the position in time
@@ -7,6 +8,10 @@ public class TimePosition {
 
     public int x, y, aliveStatus, breathing;
     public IngameObject holding;
+
+    public Vector2 vector2(){
+        return new Vector2(x,y);
+    }
 
     public TimePosition(int x, int y, int status){
         this.x = x;

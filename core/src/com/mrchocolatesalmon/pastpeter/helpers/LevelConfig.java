@@ -101,19 +101,21 @@ public class LevelConfig {
 
                                     ObjectDef definition = GameData.getObjectDefinition(objectName);
 
-                                    Gdx.app.log("LevelConfig", "Creating: " + objectName + " at " + x + "," + y);
+                                    if (definition != null) {
+                                        Gdx.app.log("LevelConfig", "Creating: " + objectName + " at " + x + "," + y);
 
-                                    //Apply other parameters
-                                    int i = 1;
-                                    while (i < params.length) {
+                                        //Apply other parameters
+                                        int i = 1;
+                                        while (i < params.length) {
 
-                                        String[] parameter_desc = params[i].trim().split(",");
-                                        i++;
+                                            String[] parameter_desc = params[i].trim().split(",");
+                                            i++;
 
-                                        definition.Parameter(parameter_desc[0], Integer.parseInt(parameter_desc[1]));
+                                            definition.Parameter(parameter_desc[0], Integer.parseInt(parameter_desc[1]));
+                                        }
+
+                                        newLevel.AddObject(new Vector2(x, y), objectName, definition);
                                     }
-
-                                    newLevel.AddObject(new Vector2(x,y), objectName, definition);
                                 }
                             }
                         }

@@ -48,11 +48,13 @@ public class IngameObject {
         if (connectionID >= 0){
             String connectionName = GameData.objectNameStored.get(connectionID);
             Vector2 connectionPos = new Vector2(startPast.x + parameterValue("connectionOffsetX"), startPast.y + parameterValue("connectionOffsetY"));
-            boolean linkedAliveStatus = (parameterValue("connectionAliveLinked") == 1);
 
             ObjectDef connectionDef = GameData.getObjectDefinition(connectionName);
 
-            if (linkedAliveStatus){ connectionDef.Parameter("start_state", parameterValue("start_state")); }
+            if (parameterValue("connectionAliveLinked") == 1)
+            {
+                connectionDef.Parameter("start_state", parameterValue("start_state"));
+            }
 
             connectedObject = level.AddObject(connectionPos, connectionName, connectionDef);
 
@@ -102,19 +104,154 @@ public class IngameObject {
 
         //if (nameID == "leaf" && position.aliveStatus <= 3){ Gdx.app.log("IngameObject", "Leaf: " + level.getCurrentTime() + ", " + position.aliveStatus); }
 
-        if (position.aliveStatus == 0 || !definition.textureMap.containsKey(position.aliveStatus)){ return; }
+        int alt = parameterValue("alt"); //Alternate textures type
+        if (definition.textureMaps.size() <= alt) { return; }
 
-        String animName = definition.textureMap.get(position.aliveStatus);
+        HashMap<Integer, String> textureMap = definition.textureMaps.get(alt);
+
+        if (position.aliveStatus == 0 || !textureMap.containsKey(position.aliveStatus)){ return; }
+
+        String animName = textureMap.get(position.aliveStatus);
 
         if (animName != null) {
             Animation anim = AssetLoader.getIngameTexture(animName);
 
             //Gdx.app.log("IngameObject", nameID);
-            //Gdx.app.log("IngameObject", definition.textureMap.get(1));
-            //Gdx.app.log("IngameObject", String.valueOf(levelAge));
+            //Gdx.app.log("IngameObject", textureMap.get(1));
+            //Gdx.app.log("IngameObject", String.valueOf(level.levelAge));
 
             batcher.draw((TextureRegion) anim.getKeyFrame(level.levelAge), position.x * GameData.GAMESIZE, position.y * GameData.GAMESIZE);
         }
+    }
+
+    TimePosition ProcessInterrupts(TimePosition currentPosition, TimeID timeID, int time)
+    {
+        Interrupt interrupt = interrupts.get(timeID)[time];
+
+        //Handle any interrupts for this time point
+        if (interrupt != null){
+
+            Gdx.app.log("IngameObject", nameID + ": processing " + interrupt.interruptID.toString() + " interrupt");
+
+            switch (interrupt.interruptID){
+                case pickup:
+                    int pickupValue = parameterValue("pickup");
+
+                    if (pickupValue == 1 || (pickupValue > 1 && currentPosition.aliveStatus == 1)) {
+                        interrupt.caller.hold(this, timeID, time); //Confirm pickup with player
+                        currentPosition.aliveStatus = 0; //Set alive status to 0 to hide
+                    }
+                    break;
+
+                case drop:
+                    if (currentPosition.aliveStatus == 0){
+                        interrupt.caller.drop(timeID, time, this);
+
+                        TimePosition callerPosition = interrupt.caller.positionArray.get(timeID)[time];
+
+                        currentPosition.x = callerPosition.x;
+                        currentPosition.y = callerPosition.y;
+
+                        if (parameterValue("pickup") == 3){
+                            currentPosition.aliveStatus = 2;
+                        } else {
+                            currentPosition.aliveStatus = 1;
+                        }
+                    }
+                    break;
+
+                case use:
+
+                    //Gdx.app.log("IngameObject", nameID + ": use interrupt");
+                    Vector2 pos = new Vector2(interrupt.targetPos.x, interrupt.targetPos.y);
+                    LinkedList<IngameObject> objs = level.getObjectsAt(timeID, time, pos);
+
+                    AtomicReference<String> parameterName = new AtomicReference<String>();
+
+                    IngameObject toUseOn = objectToUseOn(timeID, time, pos, objs, parameterName);
+                    if (toUseOn != null){
+
+                        switch (parameterName.get()){
+                            case "cut":
+                                toUseOn.sendInterrupt(new Interrupt(Interrupt.InterruptID.itemUsedOn, interrupt.caller), timeID, time);
+                                break;
+                        }
+                    } else {
+
+                    }
+
+                    break;
+
+                case itemUsedOn:
+
+                    //Gdx.app.log("IngameObject", nameID + ": itemUsedOn interrupt");
+                    IngameObject item = interrupt.caller.getHolding(timeID, time);
+                    if (item == null){ break; }
+
+                    String useParameter = parameterForInteracting(timeID, time, item);
+
+                    switch(useParameter){
+                        case "cut":
+                            if (currentPosition.aliveStatus > 0) {
+                                currentPosition.aliveStatus = (currentPosition.aliveStatus * -1) + 1;
+                            }
+                            break;
+                    }
+                    break;
+
+                case interact:
+                    int interactType = parameterValue("interact");
+                    int alt = parameterValue("alt");
+
+                    if (interactType != 0) {
+                        switch(interactType){
+                            case -1:
+                            case 1:
+                                if (currentPosition.aliveStatus == 1) { currentPosition.aliveStatus = 2; }
+                                else if (currentPosition.aliveStatus == 2) { currentPosition.aliveStatus = 1; }
+                                break;
+
+                            case -2:
+                            case 2:
+                                if (currentPosition.aliveStatus == 1) { currentPosition.aliveStatus = 2; currentPosition.x += 1;}
+                                else if (currentPosition.aliveStatus == 2) { currentPosition.aliveStatus = 1;  currentPosition.x -= 1;}
+                                break;
+
+                            case -3:
+                            case 3:
+                                if (currentPosition.aliveStatus == 1) { currentPosition.aliveStatus = 2; currentPosition.x -= 1;}
+                                else if (currentPosition.aliveStatus == 2) { currentPosition.aliveStatus = 1;  currentPosition.x += 1;}
+                                break;
+                        }
+
+                        Gdx.app.log("IngameObject", nameID + ": currentPosition.x = " + currentPosition.x);
+
+                        Gdx.app.log("IngameObject", nameID + ": definition.interactLinks.size() = " + definition.interactLinks.size());
+                        if (definition.interactLinks.size() > 0){
+                            for (IngameObject link : level.getObjectsWithNameID(timeID, time, definition.interactLinks)){
+                                if (link.parameterValue("alt") == alt){
+                                    link.sendInterrupt(new Interrupt(Interrupt.InterruptID.interact, interrupt.caller), timeID, time);
+                                }
+                            }
+                        }
+                    }
+
+                    break;
+
+                case setAliveStatus:
+                    currentPosition.aliveStatus = interrupt.value;
+                    if (interrupt.targetPos.x >= 0)
+                    {
+                        currentPosition.x = (int) interrupt.targetPos.x;
+                        currentPosition.y = (int) interrupt.targetPos.y;
+                    }
+                    break;
+            }
+
+            interrupts.get(timeID)[time] = null;
+        }
+
+        return currentPosition;
     }
 
     public void timeUpdate(TimeID timeID, int time, TimeID previousTimeID){
@@ -130,77 +267,7 @@ public class IngameObject {
             TimePosition previousPosition = currentPositions[time - 1];
             currentPosition.copyValues(previousPosition);
 
-            Interrupt interrupt = interrupts.get(timeID)[time];
-
-            //Handle any interrupts for this time point
-            if (interrupt != null){
-
-                Gdx.app.log("IngameObject", nameID + ": processing " + interrupt.interruptID.toString() + " interrupt");
-
-                switch (interrupt.interruptID){
-                    case pickup:
-                        interrupt.caller.hold(this, timeID, time); //Confirm pickup with player
-                        currentPosition.aliveStatus = 0; //Set alive status to 0 to hide
-                        break;
-
-                    case drop:
-                        if (currentPosition.aliveStatus == 0){
-                            interrupt.caller.drop(timeID, time, this);
-
-                            TimePosition callerPosition = interrupt.caller.positionArray.get(timeID)[time];
-
-                            currentPosition.x = callerPosition.x;
-                            currentPosition.y = callerPosition.y;
-                            currentPosition.aliveStatus = 1;
-                        }
-                        break;
-
-                    case use:
-
-                        //Gdx.app.log("IngameObject", nameID + ": use interrupt");
-                        Vector2 pos = new Vector2(interrupt.targetPos.x, interrupt.targetPos.y);
-                        LinkedList<IngameObject> objs = level.getObjectsAt(timeID, time, pos);
-
-                        AtomicReference<String> parameterName = new AtomicReference<String>();
-
-                        IngameObject toUseOn = objectToUseOn(timeID, time, pos, objs, parameterName);
-                        if (toUseOn != null){
-
-                            switch (parameterName.get()){
-                                case "cut":
-                                    toUseOn.sendInterrupt(new Interrupt(Interrupt.InterruptID.itemUsedOn, interrupt.caller), timeID, time);
-                                    break;
-                            }
-                        } else {
-
-                        }
-
-                        break;
-
-                    case itemUsedOn:
-
-                        //Gdx.app.log("IngameObject", nameID + ": itemUsedOn interrupt");
-                        IngameObject item = interrupt.caller.getHolding(timeID, time);
-                        if (item == null){ break; }
-
-                        String useParameter = parameterForInteracting(timeID, time, item);
-
-                        switch(useParameter){
-                            case "cut":
-                                if (currentPosition.aliveStatus > 0) {
-                                    currentPosition.aliveStatus = (currentPosition.aliveStatus * -1) + 1;
-                                }
-                                break;
-                        }
-                        break;
-
-                    case destroy:
-                        currentPosition.aliveStatus = 0;
-                        break;
-                }
-
-                interrupts.get(timeID)[time] = null;
-            }
+            currentPosition = ProcessInterrupts(currentPosition, timeID, time);
 
             //Continue processing this time point
             if (currentPosition.aliveStatus > 0){
@@ -234,7 +301,7 @@ public class IngameObject {
                                     Vector2 checkPosition = new Vector2(x,y);
 
                                     for (String n : npcDef.targetNames){
-                                        LinkedList<IngameObject> targetsFound = level.getObjectsAt(timeID, time, checkPosition, npcDef.targetNames);
+                                        LinkedList<IngameObject> targetsFound = level.getObjects(timeID, time, checkPosition, npcDef.targetNames);
 
                                         for (int t = targetsFound.size() - 1; t >= 0; t--){
                                             if (targetsFound.get(t).getTimePosition(timeID, time).aliveStatus < npcDef.minAliveStatus){
@@ -265,7 +332,7 @@ public class IngameObject {
             } else {
                 if (connectedObject != null) {
                     Gdx.app.log("IngameObject", nameID + ": sending destroy interrupt");
-                    connectedObject.sendInterrupt(new Interrupt(Interrupt.InterruptID.destroy, null), timeID, time);
+                    connectedObject.sendInterrupt(new Interrupt(null, 0), timeID, time);
                 }
             }
 
@@ -275,19 +342,36 @@ public class IngameObject {
             TimePosition previousPosition = earlierTimePositions[level.getCurrentTime(previousTimeID) + GameData.FILLERSIZE - 1];
             currentPosition.copyValues(previousPosition);
 
+            currentPosition = ProcessInterrupts(currentPosition, timeID, time);
+
             if (timeID != TimeID.past && currentPosition.aliveStatus > 0){
                 int grow_state = parameterValue("grow_state");
 
-                if (grow_state != 0){
-                    currentPosition.aliveStatus += grow_state;
+                if (grow_state == 1 || grow_state == 2)  {
+                    if (currentPosition.aliveStatus >= grow_state)  {
+                        currentPosition.aliveStatus += grow_state;
+                    }
                 }
             }
         }
 
-        if (nameID.equals("leaf")){
-            Gdx.app.log("IngameObject", nameID + ": " + timeID.toString() + " " + String.valueOf(time) + ", a=" + currentPosition.aliveStatus);
-            Gdx.app.log("IngameObject", nameID + ": " + timeID.toString() + " " + String.valueOf(time) + ", pos=" + currentPosition.x + "," + currentPosition.y);
+        int connectionID = parameterValue("connectionID");
+        if (connectionID >= 0)
+        {
+            if (parameterValue("connectionAliveLinked") == 1)
+            {
+                Interrupt connectionUpdate = new Interrupt(null,
+                                                    new Vector2(currentPosition.x + parameterValue("connectionOffsetX"), currentPosition.y + parameterValue("connectionOffsetY")),
+                                                            currentPosition.aliveStatus);
+
+                connectedObject.sendInterrupt(connectionUpdate, timeID, time);
+            }
         }
+
+        //if (nameID.equals("leaf")){
+        //    Gdx.app.log("IngameObject", nameID + ": " + timeID.toString() + " " + String.valueOf(time) + ", a=" + currentPosition.aliveStatus);
+        //    Gdx.app.log("IngameObject", nameID + ": " + timeID.toString() + " " + String.valueOf(time) + ", pos=" + currentPosition.x + "," + currentPosition.y);
+        //}
     }
 
     public boolean canUseHere(Vector2 pos, TimeID timeID, int time){

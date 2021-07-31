@@ -1,9 +1,12 @@
 package com.mrchocolatesalmon.pastpeter.datastructures;
 
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.math.Vector2;
 import com.mrchocolatesalmon.pastpeter.enums.NPCGoal;
 import com.mrchocolatesalmon.pastpeter.gameworld.GameData;
 
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedList;
 
@@ -11,8 +14,9 @@ public class ObjectDef {
 
     public HashMap<String, Integer> parameters = new HashMap<String, Integer>();
 
-    public HashMap<Integer, String> textureMap = new HashMap<Integer, String>();
+    public LinkedList<HashMap<Integer, String>> textureMaps = new LinkedList<HashMap<Integer, String>>();
 
+    public LinkedList<String> interactLinks = new LinkedList<String>();
     public LinkedList<NPCDef> npcPriorities = new LinkedList<NPCDef>();
 
     public ObjectDef(){
@@ -25,23 +29,42 @@ public class ObjectDef {
         return this;
     }
 
-    public ObjectDef Animation(int state, String texName){
+    public ObjectDef Animation(int state, String texName, int alt){
+
+        while (textureMaps.size() <= alt)
+        {
+            textureMaps.add(new HashMap<Integer, String>());
+        }
+
+        HashMap<Integer, String> textureMap = textureMaps.get(alt);
         textureMap.put(state, texName);
         return this;
     }
 
+    public ObjectDef Animation(int state, String texName){
+        Animation(state, texName, 0);
+        return this;
+    }
+
+    //Inserts animation for a range of states (between start and end inclusive)
     public ObjectDef AnimationRange(int stateStart, int stateEnd, String texName){
         for (int i = stateStart; i <= stateEnd; i++){
-            textureMap.put(i, texName);
+            Animation(i, texName);
         }
         return this;
     }
 
     //Inserts animation for a range of states (between start and end inclusive)
-    public ObjectDef Animation(int stateStart, int startEnd, String texName){
-        for (int i = stateStart; i <= startEnd; i++){
-            textureMap.put(i, texName);
+    public ObjectDef AnimationRange(int stateStart, int stateEnd, String texName, int alt){
+        for (int i = stateStart; i <= stateEnd; i++){
+            Animation(i, texName, alt);
         }
+        return this;
+    }
+
+    public ObjectDef InteractLink(String link){
+        interactLinks.add(link);
+
         return this;
     }
 
@@ -74,7 +97,15 @@ public class ObjectDef {
         ObjectDef c = new ObjectDef();
 
         c.parameters = (HashMap<String, Integer>)parameters.clone();
-        c.textureMap = (HashMap<Integer, String>)textureMap.clone();
+
+        c.textureMaps = new LinkedList<HashMap<Integer, String>>();
+        for (int i = 0; i < textureMaps.size(); i++){
+            c.textureMaps.add((HashMap<Integer, String>)textureMaps.get(i).clone());
+        }
+
+        //Gdx.app.log("ObjectDef", textureMaps.size() + ", " + c.textureMaps.size());
+
+        c.interactLinks = (LinkedList<String>)interactLinks.clone();
         c.npcPriorities = (LinkedList<NPCDef>)npcPriorities.clone();
 
         return c;
@@ -83,13 +114,13 @@ public class ObjectDef {
     public static class NPCDef {
         public NPCGoal goal;
         public Vector2 targetVector;
-        public String[] targetNames;
+        public LinkedList<String> targetNames =  new LinkedList<String>();
 
         public int minAliveStatus = 0;
 
         public NPCDef set_moveToTargets(String[] targets){
             goal = NPCGoal.moveTo;
-            targetNames = targets;
+            Collections.addAll(targetNames, targets);
 
             return this;
         }
@@ -103,7 +134,7 @@ public class ObjectDef {
 
         public NPCDef set_flyDownTo(String[] targets, int minAliveStatus){
             goal = NPCGoal.flyDownTo;
-            targetNames = targets;
+            Collections.addAll(targetNames, targets);
             this.minAliveStatus = minAliveStatus;
 
             return this;
@@ -112,5 +143,20 @@ public class ObjectDef {
 }
 
 //==Parameters==
-// [cut] 1 = can cut, 2 = can be cut, 3 = can both cut and be cut
+// [cut]        1 = can cut,
+//              2 = can be cut,
+//              3 = can both cut and be cut
+//
+// [grow_state] 1 = increments alive_status by 1 each age
+//              2 = ^ same, but only if alive_status >= 2
+//
+// [interact]   Negative values are the same, but can't be interacted with by the player
+//              1 = cycle between alive state 1 & 2
+//              2 = ^ same, but alternates moving right & left
+//              3 = ^ same, but alternates moving left & right
+//
+// [pickup]     1 = can be picked up if alive
+//              2 = can be picked up with alivestatus == 1
+//              3 = ^ same, but sets alivestatus to 2 when dropped
+//
 // [wall] becomes a wall if alive status is larger than or equal to this value

@@ -99,6 +99,16 @@ public class PlayerObject {
 
     public IngameObject getHolding(TimeID timeID, int time){ return getPosition(timeID,time).holding; }
 
+    private void interact(TimeID timeID, int time) {
+
+        IngameObject interactable = level.getObjectWithParameter("interact", getPosition(timeID, time).vector2(), timeID, time);
+
+        if (interactable != null){
+            interactable.sendInterrupt(new Interrupt(Interrupt.InterruptID.interact, this), timeID, time);
+            //Gdx.app.log("PlayerObject", "Send interact interrupt to: " + interactable.nameID);
+        }
+    }
+
     private void drop(TimeID timeID, int time){
         IngameObject obj = getHolding(timeID, time);
 
@@ -108,6 +118,7 @@ public class PlayerObject {
         }
     }
 
+    //Only drop the object if it's the object being requested to drop
     public void drop(TimeID timeID, int time, IngameObject dropObj){
         IngameObject obj = getHolding(timeID, time);
 
@@ -152,13 +163,16 @@ public class PlayerObject {
                     currentPosition.y = (int)command.pos.y;
                     break;
                 case pickup:
-                    IngameObject potentialHolding = level.findGameobjectWithParameter("pickup", new Vector2(currentPosition.x, currentPosition.y), timeID, time);
+                    IngameObject potentialHolding = level.getObjectWithParameter("pickup", new Vector2(currentPosition.x, currentPosition.y), timeID, time);
                     if (potentialHolding != null){
                         potentialHolding.sendInterrupt(new Interrupt(Interrupt.InterruptID.pickup, this), timeID, time);
                     }
                     break;
                 case drop:
                     drop(timeID, time);
+                    break;
+                case interact:
+                    interact(timeID, time);
                     break;
                 case use:
                     useItem(timeID, time, command.pos);

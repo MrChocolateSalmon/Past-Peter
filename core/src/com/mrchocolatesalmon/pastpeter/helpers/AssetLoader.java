@@ -76,15 +76,23 @@ public class AssetLoader {
 
         TextureRegion temp;
 
-        objectTextureMap.put("leaf", makeAnimation(objectTexture, 0, 1, 1, 0f, PlayMode.NORMAL));
-        objectTextureMap.put("tree", makeAnimation(objectTexture, 0, 2, 1, 0f, PlayMode.NORMAL));
-        objectTextureMap.put("tree_cut", makeAnimation(objectTexture, 0, 3, 1, 0f, PlayMode.NORMAL));
-        objectTextureMap.put("shrub", makeAnimation(objectTexture, 0, 4, 1, 0f, PlayMode.NORMAL));
-        objectTextureMap.put("tree_future", makeAnimation(objectTexture, 0, 6, 1, 0f, PlayMode.NORMAL));
-        objectTextureMap.put("axe", makeAnimation(objectTexture, 3, 1, 3, 0.2f, PlayMode.LOOP_PINGPONG));
-        objectTextureMap.put("grass", makeAnimation(objectTexture, 6, 1, 1, 0f, PlayMode.NORMAL));
-        objectTextureMap.put("bird_stand", makeAnimation(objectTexture, 7, 3, 1, 0f, PlayMode.NORMAL));
-        objectTextureMap.put("bird_fly", makeAnimation(objectTexture, 7, 4, 2, 0.4f, PlayMode.NORMAL));
+        objectTextureMap.put("leaf", makeAnimation(objectTexture,               0, 1, 1, 0f, PlayMode.NORMAL));
+        objectTextureMap.put("tree", makeAnimation(objectTexture,               0, 2, 1, 0f, PlayMode.NORMAL));
+        objectTextureMap.put("tree_cut", makeAnimation(objectTexture,           0, 3, 1, 0f, PlayMode.NORMAL));
+        objectTextureMap.put("shrub", makeAnimation(objectTexture,              0, 4, 1, 0f, PlayMode.NORMAL));
+        objectTextureMap.put("tree_future", makeAnimation(objectTexture,        0, 6, 1, 0f, PlayMode.NORMAL));
+        objectTextureMap.put("seed", makeAnimation(objectTexture,               1, 5, 2, 0.1f, PlayMode.LOOP));
+        objectTextureMap.put("ladder", makeAnimation(objectTexture,             2, 1, 1, 0f, PlayMode.NORMAL));
+        objectTextureMap.put("axe", makeAnimation(objectTexture,                3, 1, 3, 0.2f, PlayMode.LOOP_PINGPONG));
+        objectTextureMap.put("platform_brown", makeAnimation(objectTexture,     4, 1, 1, 0f, PlayMode.NORMAL));
+        objectTextureMap.put("platform_yellow", makeAnimation(objectTexture,    4, 2, 1, 0f, PlayMode.NORMAL));
+        objectTextureMap.put("lever_brown_off", makeAnimation(objectTexture,    4, 3, 1, 0f, PlayMode.NORMAL));
+        objectTextureMap.put("lever_brown_on", makeAnimation(objectTexture,     4, 4, 1, 0f, PlayMode.NORMAL));
+        objectTextureMap.put("lever_yellow_off", makeAnimation(objectTexture,   4, 5, 1, 0f, PlayMode.NORMAL));
+        objectTextureMap.put("lever_yellow_on", makeAnimation(objectTexture,    4, 6, 1, 0f, PlayMode.NORMAL));
+        objectTextureMap.put("grass", makeAnimation(objectTexture,              6, 1, 1, 0f, PlayMode.NORMAL));
+        objectTextureMap.put("bird_stand", makeAnimation(objectTexture,         7, 3, 1, 0f, PlayMode.NORMAL));
+        objectTextureMap.put("bird_fly", makeAnimation(objectTexture,           7, 4, 2, 0.4f, PlayMode.NORMAL));
     }
 
     private static void loadPlayerAssets() {

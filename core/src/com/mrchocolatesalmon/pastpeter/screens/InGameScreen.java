@@ -114,6 +114,13 @@ public class InGameScreen implements Screen, ScreenMethods {
                     playerTakeAction(useCommand, timeID, time);
                 }
             }
+        } else if (gameData.inputs.keysPressed[Input.Keys.UP]){
+            if (usingItem == null) {
+                if (playerCanMoveUp){
+                    CommandInfo moveCommand = new CommandInfo(CommandInfo.CommandID.move, new Vector2(playerPosition.x,playerPosition.y - 1));
+                    playerTakeAction(moveCommand, timeID, time);
+                }
+            }
         } else if (gameData.inputs.keysPressed[Input.Keys.DOWN]){
             if (usingItem == null) {
                 if (playerCanMoveDown){
@@ -275,20 +282,28 @@ public class InGameScreen implements Screen, ScreenMethods {
         if (usingItem == null){
             playerUseLeft = playerUseMiddle = playerUseRight = false;
 
+            Vector2 playerPos = new Vector2(playerPosition.x, playerPosition.y);
+
             //===Moving===
             IngameObject currentlyHolding = activePlayer.getHolding(currentTimeID, currentTime);
-            IngameObject potentialHolding = currentLevel.findGameobjectWithParameter("pickup", new Vector2(playerPosition.x, playerPosition.y), currentTimeID, currentTime);
+            IngameObject potentialHolding = currentLevel.getPickupObject(playerPos, currentTimeID, currentTime);
 
-            boolean inAir = !activePlayer.checkCollision(new Vector2(playerPosition.x, playerPosition.y + 1), currentTimeID, currentTime);
+            IngameObject interactable = currentLevel.getObjectWithValidParameter("interact", playerPos, currentTimeID, currentTime);
+
+            IngameObject ladderHere = currentLevel.getObjectWithParameter("ladder", playerPos, currentTimeID, currentTime);
+            IngameObject ladderBelow = currentLevel.getObjectWithParameter("ladder", new Vector2(playerPosition.x, playerPosition.y + 1), currentTimeID, currentTime);
+
+            boolean inAir = !activePlayer.checkCollision(new Vector2(playerPosition.x, playerPosition.y + 1), currentTimeID, currentTime) && ladderBelow == null;
 
             playerCanMoveLeft = !inAir && !activePlayer.checkCollision(new Vector2(playerPosition.x - 1, playerPosition.y), currentTimeID, currentTime);
             playerCanMoveRight = !inAir && !activePlayer.checkCollision(new Vector2(playerPosition.x + 1, playerPosition.y), currentTimeID, currentTime);
-            playerCanMoveDown = inAir;
-            playerCanMoveUp = false;
-            playerCanInteract = false;
+            playerCanMoveDown = inAir || ladderBelow != null;
+            playerCanMoveUp = ladderHere != null;
+            playerCanInteract = interactable != null;
             playerCanPickup = currentlyHolding == null && potentialHolding != null;
             playerCanDrop = currentlyHolding != null && potentialHolding == null;
 
+            Gdx.app.log("InGameScreen", "playerCanMoveUp = " + playerCanMoveUp);
         } else {
             playerCanMoveLeft = playerCanMoveRight = playerCanMoveDown = playerCanMoveUp = playerCanInteract = playerCanPickup = playerCanDrop = false;
 

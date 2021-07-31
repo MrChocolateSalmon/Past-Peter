@@ -41,6 +41,8 @@ public class GameData {
     public static LinkedList<String> objectNameStored;
 
     public static ObjectDef getObjectDefinition(String objectName){
+        if (!GameData.objectDefinitions.containsKey(objectName)){ Gdx.app.error("GameData", "No object def named: " + objectName); return null;}
+
         return GameData.objectDefinitions.get(objectName).CloneObjectDef();
     }
 
@@ -116,21 +118,22 @@ public class GameData {
         objectDefinitions.put("fragilestone", new ObjectDef().Parameter("wall",1));
 
         objectDefinitions.put("grass", new ObjectDef().Parameter("wall",1)
-
                                     .Animation(1, "grass"));
 
         objectDefinitions.put("key", new ObjectDef().Parameter("pickup",1));
 
-        objectDefinitions.put("ladder", new ObjectDef().Parameter("ladder",1));
+        objectDefinitions.put("ladder", new ObjectDef().Parameter("ladder",1).Parameter("grow_state", 1)
+                            .AnimationRange(1, 2, "ladder"));
 
-        objectDefinitions.put("lever", new ObjectDef().Parameter("interact",1));
-
-        objectDefinitions.put("leaf", new ObjectDef().Parameter("wall",3).Parameter("grow_state", 1)
-                                .AnimationRange(3, 6, "leaf"));
+        objectDefinitions.put("lever", new ObjectDef().Parameter("interact",1).InteractLink("platform")
+                            .Animation(1, "lever_brown_off", 0).Animation(1, "lever_yellow_off", 1)
+                            .Animation(2, "lever_brown_on",  0).Animation(2, "lever_yellow_on",  1));
+        objectDefinitions.put("leaf", new ObjectDef().Parameter("wall",3).AnimationRange(3, 6, "leaf"));
 
         objectDefinitions.put("openstone", new ObjectDef().Parameter("wall",1));
 
-        objectDefinitions.put("platform", new ObjectDef().Parameter("wall",1));
+        objectDefinitions.put("platform", new ObjectDef().Parameter("wall",1).Parameter("interact", -2)
+                                .AnimationRange(1,2, "platform_brown", 0).AnimationRange(1, 2, "platform_yellow", 1));
 
         objectDefinitions.put("paradoxlever", new ObjectDef().Parameter("interact",1));
 
@@ -139,7 +142,9 @@ public class GameData {
 
         objectDefinitions.put("rabbit", new ObjectDef().Parameter("gravity",1).Parameter("npc",1));
 
-        objectDefinitions.put("seed", new ObjectDef().Parameter("pickup",1));
+        objectDefinitions.put("seed", new ObjectDef().Parameter("pickup",3).Parameter("wall",3).Parameter("grow_state", 2).
+                                Animation(1, "seed").Animation(-2, "tree_cut").Animation(2, "shrub").
+                                AnimationRange(3, 4, "tree").Connection("leaf", 0, -1, true));
 
         objectDefinitions.put("stone", new ObjectDef().Parameter("wall",1));
 
@@ -147,7 +152,7 @@ public class GameData {
 
         objectDefinitions.put("tree", new ObjectDef().Parameter("wall",3).Parameter("grow_state", 1).Parameter("cut", 2)
                                 .Connection("leaf", 0, -1, true).Animation(-2, "tree_cut").Animation(2, "shrub")
-                                .Animation(3, 4, "tree"));
+                                .AnimationRange(3, 4, "tree"));
 
         objectDefinitions.put("vines", new ObjectDef().Parameter("ladder",1));
 
