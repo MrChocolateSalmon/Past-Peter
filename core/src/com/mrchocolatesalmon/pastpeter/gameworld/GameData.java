@@ -115,7 +115,8 @@ public class GameData {
 
         objectDefinitions.put("door", new ObjectDef().Parameter("wall",1));
 
-        objectDefinitions.put("fragilestone", new ObjectDef().Parameter("wall",1));
+        objectDefinitions.put("fragilestone", new ObjectDef().Parameter("wall",1).Animation(1, "fragilestone1")
+                                .Animation(2, "fragilestone2"));
 
         objectDefinitions.put("grass", new ObjectDef().Parameter("wall",1)
                                     .Animation(1, "grass"));
@@ -138,15 +139,15 @@ public class GameData {
         objectDefinitions.put("paradoxlever", new ObjectDef().Parameter("interact",1));
 
         objectDefinitions.put("paradoxplatform", new ObjectDef().Parameter("wall",1));
-        objectDefinitions.put("pressureplate", new ObjectDef());
+        objectDefinitions.put("pressureplate", new ObjectDef().Animation(1, "pressureplate"));
 
-        objectDefinitions.put("rabbit", new ObjectDef().Parameter("gravity",1).Parameter("npc",1));
+        objectDefinitions.put("rabbit", new ObjectDef().Parameter("gravity",1).Parameter("npc",1).Animation(1, "rabbit"));
 
         objectDefinitions.put("seed", new ObjectDef().Parameter("pickup",3).Parameter("wall",3).Parameter("grow_state", 2).
                                 Animation(1, "seed").Animation(-2, "tree_cut").Animation(2, "shrub").
                                 AnimationRange(3, 4, "tree").Connection("leaf", 0, -1, true));
 
-        objectDefinitions.put("stone", new ObjectDef().Parameter("wall",1));
+        objectDefinitions.put("stone", new ObjectDef().Parameter("wall",1).Animation(1, "stone"));
 
         objectDefinitions.put("tallgrass", new ObjectDef());
 

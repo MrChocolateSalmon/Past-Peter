@@ -101,6 +101,8 @@ public class LevelConfig {
 
                                     ObjectDef definition = GameData.getObjectDefinition(objectName);
 
+                                    //if (objectName.equals("fragilestone")){ Gdx.app.log("LevelConfig", "Fragile Stone!"); }
+
                                     if (definition != null) {
                                         Gdx.app.log("LevelConfig", "Creating: " + objectName + " at " + x + "," + y);
 

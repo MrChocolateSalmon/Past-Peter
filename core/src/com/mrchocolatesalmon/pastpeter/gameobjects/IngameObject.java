@@ -102,7 +102,7 @@ public class IngameObject {
 
         TimePosition position = positionArray.get(level.getCurrentTimeID())[level.getCurrentTime()];
 
-        //if (nameID == "leaf" && position.aliveStatus <= 3){ Gdx.app.log("IngameObject", "Leaf: " + level.getCurrentTime() + ", " + position.aliveStatus); }
+        //if (nameID.equals("fragilestone")){ Gdx.app.log("IngameObject", "Fragile Stone: " + level.getCurrentTime() + ", " + position.aliveStatus); }
 
         int alt = parameterValue("alt"); //Alternate textures type
         if (definition.textureMaps.size() <= alt) { return; }

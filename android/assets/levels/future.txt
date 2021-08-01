@@ -66,8 +66,8 @@ stone
 stone
 null
 stone
-fragilestone:start_state,3
-fragilestone:start_state,3
+fragilestone:start_state,2
+fragilestone:start_state,2
 grass
 null
 grass

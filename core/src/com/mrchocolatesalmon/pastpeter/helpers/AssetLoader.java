@@ -90,9 +90,15 @@ public class AssetLoader {
         objectTextureMap.put("lever_brown_on", makeAnimation(objectTexture,     4, 4, 1, 0f, PlayMode.NORMAL));
         objectTextureMap.put("lever_yellow_off", makeAnimation(objectTexture,   4, 5, 1, 0f, PlayMode.NORMAL));
         objectTextureMap.put("lever_yellow_on", makeAnimation(objectTexture,    4, 6, 1, 0f, PlayMode.NORMAL));
+        objectTextureMap.put("stone", makeAnimation(objectTexture,              5, 1, 1, 0f, PlayMode.NORMAL));
+        objectTextureMap.put("fragilestone2", makeAnimation(objectTexture,      5, 2, 1, 0f, PlayMode.NORMAL));
+        objectTextureMap.put("fragilestone1", makeAnimation(objectTexture,      5, 3, 1, 0f, PlayMode.NORMAL));
+        objectTextureMap.put("pressureplate", makeAnimation(objectTexture,      5, 7, 1, 0f, PlayMode.NORMAL));
         objectTextureMap.put("grass", makeAnimation(objectTexture,              6, 1, 1, 0f, PlayMode.NORMAL));
         objectTextureMap.put("bird_stand", makeAnimation(objectTexture,         7, 3, 1, 0f, PlayMode.NORMAL));
         objectTextureMap.put("bird_fly", makeAnimation(objectTexture,           7, 4, 2, 0.4f, PlayMode.NORMAL));
+        objectTextureMap.put("rabbit", makeAnimation(objectTexture,             7, 5, 2, 0.4f, PlayMode.NORMAL));
+        objectTextureMap.put("builder", makeAnimation(objectTexture,            7, 6, 2, 0.4f, PlayMode.NORMAL));
     }
 
     private static void loadPlayerAssets() {
