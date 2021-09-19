@@ -44,7 +44,8 @@ public class IntroScreen implements Screen, ScreenMethods {
 
     @Override
     public void resize(int width, int height) {
-
+        gameData.screenWidth = width;
+        gameData.screenHeight = height;
     }
 
     @Override

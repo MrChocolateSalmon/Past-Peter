@@ -26,6 +26,8 @@ public class GameData {
 
     public final static int MAXMOVES = 99, FILLERSIZE = 10;
 
+    public float screenWidth, screenHeight;
+
     public Screen levelSelectScreen, levelEditorScreen;
     public InGameScreen ingameScreen;
     public WinScreen winScreen;
@@ -83,12 +85,19 @@ public class GameData {
         //Levels
         levels = LevelConfig.ConfigureLevels(this, levelNames);
 
-
         //Initialize Screens
         levelSelectScreen = new LevelSelectScreen(this, screenControl);
         ingameScreen = new InGameScreen(this, screenControl);
         winScreen = new WinScreen(this, screenControl);
         levelEditorScreen = new LevelEditorScreen(this, screenControl);
+    }
+
+    public float MouseX(){
+        return (float) (Gdx.input.getX()) * ((GAMESIZE * GAMEWIDTH) / screenWidth);
+    }
+
+    public float MouseY(){
+        return (float) (Gdx.input.getY()) * ((GAMESIZE * GAMEHEIGHT) / screenHeight);
     }
 
     void SetObjectDefinitions(){
@@ -111,7 +120,8 @@ public class GameData {
 
         objectDefinitions.put("churchcross", new ObjectDef());
 
-        objectDefinitions.put("dog", new ObjectDef().Parameter("gravity", 1).Parameter("npc", 1));
+        objectDefinitions.put("dog", new ObjectDef().Parameter("gravity", 1).Parameter("npc", 1).Parameter("grow_state", 1)
+                                    .AnimationRange(1, 2, "dog_idle").Animation(3, "dog_savage_idle"));
 
         objectDefinitions.put("door", new ObjectDef().Parameter("wall",1));
 

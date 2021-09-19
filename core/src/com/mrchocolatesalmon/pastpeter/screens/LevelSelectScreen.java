@@ -22,7 +22,6 @@ public class LevelSelectScreen implements Screen, ScreenMethods {
 
     boolean displayLevelInfo = false;
 
-    float screenWidth, screenHeight;
     int levelButtonsPerRow = 5;
 
     public LevelSelectScreen(GameData gameData, Game screenControl){
@@ -53,8 +52,8 @@ public class LevelSelectScreen implements Screen, ScreenMethods {
         }
         else {
 
-            float mousex = (float) (Gdx.input.getX());
-            float mousey = (float) (Gdx.input.getY());
+            float mousex = gameData.MouseX();
+            float mousey = gameData.MouseY();
 
             Gdx.app.log("LevelSelect", "pos : " + mousex + "," + mousey);
 
@@ -78,11 +77,11 @@ public class LevelSelectScreen implements Screen, ScreenMethods {
         gameData.inputs.SetCurrentScreen(this);
         Gdx.app.log("LevelSelect", "SetCurrentScreen");
 
-        screenWidth = Gdx.graphics.getWidth();
-        screenHeight = Gdx.graphics.getHeight();
+        gameData.screenWidth = Gdx.graphics.getWidth();
+        gameData.screenHeight = Gdx.graphics.getHeight();
 
         Gdx.app.log("LevelSelect", "camRatio : " + gameData.CAMRATIO);
-        Gdx.app.log("LevelSelect", "screenRatio : " + (screenWidth/screenHeight));
+        Gdx.app.log("LevelSelect", "screenRatio : " + (gameData.screenWidth/gameData.screenHeight));
     }
 
     @Override
@@ -109,8 +108,8 @@ public class LevelSelectScreen implements Screen, ScreenMethods {
 
     @Override
     public void resize(int width, int height) {
-        screenWidth = width;
-        screenHeight = height;
+        gameData.screenWidth = width;
+        gameData.screenHeight = height;
     }
 
     @Override

@@ -83,11 +83,6 @@ public class ObjectDef {
             parameters.put("connectionOffsetY", offsetY);
 
             parameters.put("connectionAliveLinked", connectionAliveLinked ? 1 : 0);
-
-            //parameters.put("connectionType", connectionType);
-            //connectionType???
-            //0 = Same alive status
-            //1 = Alive status minus 1
         }
 
         return this;

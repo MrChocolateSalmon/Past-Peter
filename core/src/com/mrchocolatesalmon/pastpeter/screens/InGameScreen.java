@@ -73,6 +73,10 @@ public class InGameScreen implements Screen, ScreenMethods {
         //======================
         //Process player inputs
         //======================
+        if (gameData.inputs.keysPressed[Input.Keys.ESCAPE]){
+            screenControl.setScreen(gameData.levelSelectScreen);
+        }
+
         if (gameData.inputs.keysPressed[Input.Keys.NUM_1]){
             usingItem = null;
             currentLevel.setCurrentTimeID(TimeID.past);
@@ -320,7 +324,8 @@ public class InGameScreen implements Screen, ScreenMethods {
 
     @Override
     public void resize(int width, int height) {
-
+        gameData.screenWidth = width;
+        gameData.screenHeight = height;
     }
 
     @Override
