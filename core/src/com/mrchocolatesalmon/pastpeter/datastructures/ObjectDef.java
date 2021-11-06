@@ -109,6 +109,7 @@ public class ObjectDef {
     public static class NPCDef {
         public NPCGoal goal;
         public Vector2 targetVector;
+        public float targetValue;
         public LinkedList<String> targetNames =  new LinkedList<String>();
 
         public int minAliveStatus = 0;
@@ -120,9 +121,9 @@ public class ObjectDef {
             return this;
         }
 
-        public NPCDef set_moveDirection(Vector2 dir){
-            goal = NPCGoal.moveDirection;
-            targetVector = dir;
+        public NPCDef set_huntIfState(int value){
+            goal = NPCGoal.huntIfState;
+            targetValue = value;
 
             return this;
         }
@@ -131,6 +132,20 @@ public class ObjectDef {
             goal = NPCGoal.flyDownTo;
             Collections.addAll(targetNames, targets);
             this.minAliveStatus = minAliveStatus;
+
+            return this;
+        }
+
+        public NPCDef set_moveDirection(Vector2 dir){
+            goal = NPCGoal.moveDirection;
+            targetVector = dir;
+
+            return this;
+        }
+
+        public NPCDef set_killPlayer(int value){
+            goal = NPCGoal.killPlayer;
+            targetValue = value;
 
             return this;
         }

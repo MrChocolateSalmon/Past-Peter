@@ -121,7 +121,8 @@ public class GameData {
         objectDefinitions.put("churchcross", new ObjectDef());
 
         objectDefinitions.put("dog", new ObjectDef().Parameter("gravity", 1).Parameter("npc", 1).Parameter("grow_state", 1)
-                                    .AnimationRange(1, 2, "dog_idle").Animation(3, "dog_savage_idle"));
+                                    .AnimationRange(1, 2, "dog_idle").Animation(3, "dog_savage_idle")
+                                    .NPC(new ObjectDef.NPCDef().set_huntIfState(3)));
 
         objectDefinitions.put("door", new ObjectDef().Parameter("wall",1));
 

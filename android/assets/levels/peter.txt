@@ -59,7 +59,7 @@ ladder
 grass
 grass
 ladder
-platform:alt,0:flipped,1
+platform:alt,0:interact,-3
 null
 null
 null
@@ -81,7 +81,7 @@ ladder
 null
 lever:alt,0
 grass
-platform:alt,0:flipped,0
+platform:alt,0
 grass
 grass
 grass

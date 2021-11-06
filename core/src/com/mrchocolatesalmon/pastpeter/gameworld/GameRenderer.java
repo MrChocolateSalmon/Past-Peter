@@ -108,7 +108,7 @@ public class GameRenderer {
         drawText(level.name, winBorderX + 10, winBorderY + 10);
     }
 
-    public void renderLevel(Level level){
+    public void renderLevel(Level level, float delta){
         for (int i = 0; i < level.objects.size(); i++)
         {
             IngameObject obj = level.objects.get(i);
@@ -120,12 +120,12 @@ public class GameRenderer {
         {
             PlayerObject player = level.players.get(i);
 
-            player.render(batcher);
+            player.render(batcher, delta);
         }
     }
 
-    public void renderWinScreen(Level currentLevel){
-        renderLevel(currentLevel);
+    public void renderWinScreen(Level currentLevel, float delta){
+        renderLevel(currentLevel, delta);
         batcher.draw(AssetLoader.winBorder, 128, 128);
     }
 

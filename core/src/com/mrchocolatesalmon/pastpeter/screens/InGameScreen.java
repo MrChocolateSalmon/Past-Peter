@@ -6,6 +6,7 @@ import com.badlogic.gdx.Input;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.math.Vector2;
 import com.mrchocolatesalmon.pastpeter.datastructures.CommandInfo;
+import com.mrchocolatesalmon.pastpeter.datastructures.PlayerInterrupt;
 import com.mrchocolatesalmon.pastpeter.datastructures.TimePosition;
 import com.mrchocolatesalmon.pastpeter.enums.TimeID;
 import com.mrchocolatesalmon.pastpeter.gameobjects.IngameObject;
@@ -56,7 +57,7 @@ public class InGameScreen implements Screen, ScreenMethods {
 
         gameData.renderer.renderStart(delta, currentLevel.GetBackground(), currentLevel.getCurrentTimeID());
 
-        gameData.renderer.renderLevel(currentLevel);
+        gameData.renderer.renderLevel(currentLevel, delta);
 
         gameData.renderer.renderEnd();
     }
@@ -78,82 +79,79 @@ public class InGameScreen implements Screen, ScreenMethods {
         }
 
         if (gameData.inputs.keysPressed[Input.Keys.NUM_1]){
-            usingItem = null;
-            currentLevel.setCurrentTimeID(TimeID.past);
-            sceneUpdate();
+            setCurrentTimeID(TimeID.past);
         } else if (gameData.inputs.keysPressed[Input.Keys.NUM_2]){
-            usingItem = null;
-            currentLevel.setCurrentTimeID(TimeID.present);
-            sceneUpdate();
+            setCurrentTimeID(TimeID.present);
         } else if (gameData.inputs.keysPressed[Input.Keys.NUM_3]){
-            usingItem = null;
-            currentLevel.setCurrentTimeID(TimeID.future);
-            sceneUpdate();
+            setCurrentTimeID(TimeID.future);
         } else if (gameData.inputs.keysPressed[Input.Keys.BACKSPACE]){
             usingItem = null;
             decrementTime();
+            renderFlush(currentLevel.getCurrentTimeID(), true); //Snap everything back
         }
 
-        if (gameData.inputs.keysPressed[Input.Keys.LEFT]){
-            if (usingItem == null){
-                if (playerCanMoveLeft){
-                    CommandInfo moveCommand = new CommandInfo(CommandInfo.CommandID.move, new Vector2(playerPosition.x - 1,playerPosition.y));
-                    playerTakeAction(moveCommand, timeID, time);
+        if (playerPosition.aliveStatus > 0){
+            if (gameData.inputs.keysPressed[Input.Keys.LEFT]){
+                if (usingItem == null){
+                    if (playerCanMoveLeft){
+                        CommandInfo moveCommand = new CommandInfo(CommandInfo.CommandID.move, new Vector2(-1, 0));
+                        playerTakeAction(moveCommand, timeID, time);
+                    }
+                } else {
+                    if (playerUseLeft){
+                        CommandInfo useCommand = new CommandInfo(CommandInfo.CommandID.use, new Vector2(-1,0));
+                        playerTakeAction(useCommand, timeID, time);
+                    }
                 }
-            } else {
-                if (playerUseLeft){
-                    CommandInfo useCommand = new CommandInfo(CommandInfo.CommandID.use, new Vector2(playerPosition.x - 1,playerPosition.y));
-                    playerTakeAction(useCommand, timeID, time);
+            } else if (gameData.inputs.keysPressed[Input.Keys.RIGHT]){
+                if (usingItem == null) {
+                    if (playerCanMoveRight){
+                        CommandInfo moveCommand = new CommandInfo(CommandInfo.CommandID.move, new Vector2(1,0));
+                        playerTakeAction(moveCommand, timeID, time);
+                    }
+                } else {
+                    if (playerUseRight){
+                        CommandInfo useCommand = new CommandInfo(CommandInfo.CommandID.use, new Vector2(1,0));
+                        playerTakeAction(useCommand, timeID, time);
+                    }
                 }
-            }
-        } else if (gameData.inputs.keysPressed[Input.Keys.RIGHT]){
-            if (usingItem == null) {
-                if (playerCanMoveRight){
-                    CommandInfo moveCommand = new CommandInfo(CommandInfo.CommandID.move, new Vector2(playerPosition.x + 1,playerPosition.y));
-                    playerTakeAction(moveCommand, timeID, time);
+            } else if (gameData.inputs.keysPressed[Input.Keys.UP]){
+                if (usingItem == null) {
+                    if (playerCanMoveUp){
+                        CommandInfo moveCommand = new CommandInfo(CommandInfo.CommandID.move, new Vector2(0,-1));
+                        playerTakeAction(moveCommand, timeID, time);
+                    }
                 }
-            } else {
-                if (playerUseRight){
-                    CommandInfo useCommand = new CommandInfo(CommandInfo.CommandID.use, new Vector2(playerPosition.x + 1,playerPosition.y));
-                    playerTakeAction(useCommand, timeID, time);
+            } else if (gameData.inputs.keysPressed[Input.Keys.DOWN]){
+                if (usingItem == null) {
+                    if (playerCanMoveDown){
+                        CommandInfo moveCommand = new CommandInfo(CommandInfo.CommandID.move, new Vector2(0,1));
+                        playerTakeAction(moveCommand, timeID, time);
+                    } else if (playerCanDrop){
+                        CommandInfo dropCommand = new CommandInfo(CommandInfo.CommandID.drop, new Vector2(playerPosition.x,playerPosition.y ));
+                        playerTakeAction(dropCommand, timeID, time);
+                    } else if (playerCanPickup){
+                        CommandInfo pickupCommand = new CommandInfo(CommandInfo.CommandID.pickup, new Vector2(playerPosition.x,playerPosition.y ));
+                        playerTakeAction(pickupCommand, timeID, time);
+                    } else if (playerCanInteract){
+                        CommandInfo pickupCommand = new CommandInfo(CommandInfo.CommandID.interact, new Vector2(playerPosition.x,playerPosition.y ));
+                        playerTakeAction(pickupCommand, timeID, time);
+                    }
+                } else {
+                    if (playerUseMiddle) {
+                        CommandInfo pickupCommand = new CommandInfo(CommandInfo.CommandID.use, new Vector2(playerPosition.x, playerPosition.y));
+                        playerTakeAction(pickupCommand, timeID, time);
+                    }
                 }
-            }
-        } else if (gameData.inputs.keysPressed[Input.Keys.UP]){
-            if (usingItem == null) {
-                if (playerCanMoveUp){
-                    CommandInfo moveCommand = new CommandInfo(CommandInfo.CommandID.move, new Vector2(playerPosition.x,playerPosition.y - 1));
-                    playerTakeAction(moveCommand, timeID, time);
+            } else if (gameData.inputs.keysPressed[Input.Keys.Q]) {
+                if (usingItem == null){
+                    usingItem = activePlayer.getHolding(timeID, time);
+                } else {
+                    usingItem = null;
                 }
-            }
-        } else if (gameData.inputs.keysPressed[Input.Keys.DOWN]){
-            if (usingItem == null) {
-                if (playerCanMoveDown){
-                    CommandInfo moveCommand = new CommandInfo(CommandInfo.CommandID.move, new Vector2(playerPosition.x,playerPosition.y + 1));
-                    playerTakeAction(moveCommand, timeID, time);
-                } else if (playerCanDrop){
-                    CommandInfo dropCommand = new CommandInfo(CommandInfo.CommandID.drop, new Vector2(playerPosition.x,playerPosition.y ));
-                    playerTakeAction(dropCommand, timeID, time);
-                } else if (playerCanPickup){
-                    CommandInfo pickupCommand = new CommandInfo(CommandInfo.CommandID.pickup, new Vector2(playerPosition.x,playerPosition.y ));
-                    playerTakeAction(pickupCommand, timeID, time);
-                } else if (playerCanInteract){
-                    CommandInfo pickupCommand = new CommandInfo(CommandInfo.CommandID.interact, new Vector2(playerPosition.x,playerPosition.y ));
-                    playerTakeAction(pickupCommand, timeID, time);
-                }
-            } else {
-                if (playerUseMiddle) {
-                    CommandInfo pickupCommand = new CommandInfo(CommandInfo.CommandID.use, new Vector2(playerPosition.x, playerPosition.y));
-                    playerTakeAction(pickupCommand, timeID, time);
-                }
-            }
-        } else if (gameData.inputs.keysPressed[Input.Keys.Q]) {
-            if (usingItem == null){
-                usingItem = activePlayer.getHolding(timeID, time);
-            } else {
-                usingItem = null;
-            }
 
-            checkPlayerOptions();
+                checkPlayerOptions();
+            }
         }
 
         gameData.inputs.resetKeysPressed();
@@ -193,6 +191,9 @@ public class InGameScreen implements Screen, ScreenMethods {
 
         TimeID[] updateTimes;
 
+        int currentTime = currentLevel.getCurrentTime();
+        TimeID currentTimeID = currentLevel.getCurrentTimeID();
+
         Gdx.app.log("InGameScreen", "======================");
         Gdx.app.log("InGameScreen", "timeUpdateAll() start");
 
@@ -209,22 +210,47 @@ public class InGameScreen implements Screen, ScreenMethods {
 
         for (int u = 0; u < updateTimes.length; u++){
 
-            TimeID currentTimeID = updateTimes[u];
-            TimeID previousTimeID = (currentTimeID == TimeID.future) ? TimeID.present : TimeID.past;
+            TimeID thisTimeID = updateTimes[u];
+            TimeID previousTimeID = (thisTimeID == TimeID.future) ? TimeID.present : TimeID.past;
 
             //Start from the current point and update forward
-            int tempCurrentTime = currentLevel.getCurrentTime(currentTimeID);
+            int tempCurrentTime = currentLevel.getCurrentTime(thisTimeID);
             for (int t = (u==0)?tempCurrentTime:0; t < tempCurrentTime + GameData.FILLERSIZE; t++) {
 
+                Gdx.app.log("InGameScreen", "--- " + thisTimeID + ": " + t + " ---");
+
+                boolean isCurrentMoment = (currentTime == t && currentTimeID == thisTimeID);
+
+                //Gdx.app.log("InGameScreen", "currentTimeID = " + currentTimeID);
+                //Gdx.app.log("InGameScreen", "currentTime = " + currentTime);
+
+                //Clear interrupts for objects
+                for (int i = 0; i < currentLevel.objects.size(); i++) { currentLevel.objects.get(i).clearInterrupts();  }
+
+                //Update players
+                for (int i = 0; i < currentLevel.players.size(); i++) {
+                    currentLevel.players.get(i).timeUpdate(thisTimeID, t, previousTimeID, isCurrentMoment);
+                }
+
+                for (int i = 0; i < currentLevel.players.size(); i++) {
+                    PlayerObject player = currentLevel.players.get(i);
+                    player.pushAnimationList();
+                    player.clearInterrupts();
+                }
+
                 //Repeats for a certain number of iterations so all interactions/interrupts can be processed
-                for (int it = 0; it < iterations; it++) {
+                for (int it = 1; it <= iterations; it++) {
 
                     for (int i = 0; i < currentLevel.players.size(); i++) {
-                        currentLevel.players.get(i).timeUpdate(currentTimeID, t, previousTimeID);
+                        currentLevel.players.get(i).prepareForInterrupts(thisTimeID, t);
                     }
 
                     for (int i = 0; i < currentLevel.objects.size(); i++) {
-                        currentLevel.objects.get(i).timeUpdate(currentTimeID, t, previousTimeID);
+                        currentLevel.objects.get(i).timeUpdate(thisTimeID, t, previousTimeID);
+                    }
+
+                    for (int i = 0; i < currentLevel.players.size(); i++) {
+                        currentLevel.players.get(i).processInterrupts(thisTimeID, t, it == iterations, isCurrentMoment);
                     }
                 }
             }
@@ -273,6 +299,19 @@ public class InGameScreen implements Screen, ScreenMethods {
     private void sceneUpdate(){
         checkPlayerOptions();
         checkPlayerWin();
+    }
+
+    private void setCurrentTimeID(TimeID timeID){
+        usingItem = null;
+        currentLevel.setCurrentTimeID(timeID);
+        renderFlush(timeID, false);
+        sceneUpdate();
+    }
+
+    private void renderFlush(TimeID timeID, boolean fullFlush){
+        for (int i = 0; i < currentLevel.players.size(); i++) {
+            currentLevel.players.get(i).flushAnimationList(timeID, currentLevel.getCurrentTime(timeID), fullFlush);
+        }
     }
 
     private void checkPlayerOptions() {

@@ -53,7 +53,7 @@ null
 null
 null
 stone
-platform:alt,1:flipped,0
+platform:alt,1
 stone
 stone
 stone
@@ -61,7 +61,7 @@ grass
 grass
 grass
 grass
-platform:alt,1:flipped,0
+platform:alt,1
 stone
 stone
 null
@@ -85,7 +85,7 @@ null
 grass
 grass
 null
-platform:alt,1:flipped,1
+platform:alt,1:interact,-3
 stone
 stone
 stone
@@ -103,8 +103,8 @@ true
 stone
 stone
 grass
-platform:alt,1:flipped,0
-platform:alt,1:flipped,0
+platform:alt,1
+platform:alt,1
 null
 grass
 grass

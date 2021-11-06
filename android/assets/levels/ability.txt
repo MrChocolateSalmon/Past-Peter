@@ -63,7 +63,7 @@ null
 null
 ladder
 grass
-platform:alt,1:flipped,0
+platform:alt,1
 null
 grass
 ladder

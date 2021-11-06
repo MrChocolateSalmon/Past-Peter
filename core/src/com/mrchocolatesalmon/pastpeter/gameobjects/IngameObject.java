@@ -7,9 +7,8 @@ import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Vector2;
-import com.mrchocolatesalmon.pastpeter.datastructures.Interrupt;
-import com.mrchocolatesalmon.pastpeter.datastructures.ObjectDef;
-import com.mrchocolatesalmon.pastpeter.datastructures.TimePosition;
+import com.badlogic.gdx.math.Vector3;
+import com.mrchocolatesalmon.pastpeter.datastructures.*;
 import com.mrchocolatesalmon.pastpeter.enums.TimeID;
 import com.mrchocolatesalmon.pastpeter.gameworld.GameData;
 import com.mrchocolatesalmon.pastpeter.gameworld.Level;
@@ -22,7 +21,7 @@ import java.util.concurrent.atomic.AtomicReference;
 public class IngameObject {
 
     protected HashMap<TimeID,TimePosition[]> positionArray = new HashMap<TimeID, TimePosition[]>();
-    protected HashMap<TimeID, Interrupt[]> interrupts = new HashMap<TimeID, Interrupt[]>();
+    protected LinkedList<IngameInterrupt> interrupts = new LinkedList<IngameInterrupt>();
 
     protected HashMap<String, Boolean> tags = new HashMap<String, Boolean>();
 
@@ -65,7 +64,7 @@ public class IngameObject {
     public void Reset(){
         //Past
         TimePosition[] positions = new TimePosition[GameData.MAXMOVES + GameData.FILLERSIZE];
-        Interrupt[] interruptArray = new Interrupt[GameData.MAXMOVES + GameData.FILLERSIZE];
+        IngameInterrupt[] interruptArray = new IngameInterrupt[GameData.MAXMOVES + GameData.FILLERSIZE];
         TimePosition startPosition = new TimePosition((int)startPast.x, (int)startPast.y,definition.parameters.get("start_state"));
 
         for (int i = 0; i < GameData.MAXMOVES + GameData.FILLERSIZE; i++){
@@ -73,27 +72,24 @@ public class IngameObject {
             interruptArray[i] = null;
         }
         positionArray.put(TimeID.past, positions);
-        interrupts.put(TimeID.past, interruptArray);
 
         //Present
         positions = new TimePosition[GameData.MAXMOVES + GameData.FILLERSIZE];
-        interruptArray = new Interrupt[GameData.MAXMOVES + GameData.FILLERSIZE];
+        interruptArray = new IngameInterrupt[GameData.MAXMOVES + GameData.FILLERSIZE];
         for (int i = 0; i < GameData.MAXMOVES + GameData.FILLERSIZE; i++){
             positions[i] = startPosition.Clone();
             interruptArray[i] = null;
         }
         positionArray.put(TimeID.present, positions);
-        interrupts.put(TimeID.present, interruptArray);
 
         //Future
         positions = new TimePosition[GameData.MAXMOVES + GameData.FILLERSIZE];
-        interruptArray = new Interrupt[GameData.MAXMOVES + GameData.FILLERSIZE];
+        interruptArray = new IngameInterrupt[GameData.MAXMOVES + GameData.FILLERSIZE];
         for (int i = 0; i < GameData.MAXMOVES + GameData.FILLERSIZE; i++){
             positions[i] = startPosition.Clone();
             interruptArray[i] = null;
         }
         positionArray.put(TimeID.future, positions);
-        interrupts.put(TimeID.future, interruptArray);
     }
 
     public String getNameID(){ return nameID; }
@@ -126,14 +122,12 @@ public class IngameObject {
 
     TimePosition ProcessInterrupts(TimePosition currentPosition, TimeID timeID, int time)
     {
-        Interrupt interrupt = interrupts.get(timeID)[time];
+        for (int i = interrupts.size() - 1; i >= 0; i--){
 
-        //Handle any interrupts for this time point
-        if (interrupt != null){
-
+            IngameInterrupt interrupt = interrupts.get(0);
             Gdx.app.log("IngameObject", nameID + ": processing " + interrupt.interruptID.toString() + " interrupt");
 
-            switch (interrupt.interruptID){
+            switch (interrupt.interruptID) {
                 case pickup:
                     int pickupValue = parameterValue("pickup");
 
@@ -144,7 +138,7 @@ public class IngameObject {
                     break;
 
                 case drop:
-                    if (currentPosition.aliveStatus == 0){
+                    if (currentPosition.aliveStatus == 0) {
                         interrupt.caller.drop(timeID, time, this);
 
                         TimePosition callerPosition = interrupt.caller.positionArray.get(timeID)[time];
@@ -152,7 +146,7 @@ public class IngameObject {
                         currentPosition.x = callerPosition.x;
                         currentPosition.y = callerPosition.y;
 
-                        if (parameterValue("pickup") == 3){
+                        if (parameterValue("pickup") == 3) {
                             currentPosition.aliveStatus = 2;
                         } else {
                             currentPosition.aliveStatus = 1;
@@ -169,11 +163,11 @@ public class IngameObject {
                     AtomicReference<String> parameterName = new AtomicReference<String>();
 
                     IngameObject toUseOn = objectToUseOn(timeID, time, pos, objs, parameterName);
-                    if (toUseOn != null){
+                    if (toUseOn != null) {
 
-                        switch (parameterName.get()){
+                        switch (parameterName.get()) {
                             case "cut":
-                                toUseOn.sendInterrupt(new Interrupt(Interrupt.InterruptID.itemUsedOn, interrupt.caller), timeID, time);
+                                toUseOn.sendInterrupt(new IngameInterrupt(Interrupt.InterruptID.itemUsedOn, interrupt.caller), timeID, time);
                                 break;
                         }
                     } else {
@@ -186,11 +180,13 @@ public class IngameObject {
 
                     //Gdx.app.log("IngameObject", nameID + ": itemUsedOn interrupt");
                     IngameObject item = interrupt.caller.getHolding(timeID, time);
-                    if (item == null){ break; }
+                    if (item == null) {
+                        break;
+                    }
 
                     String useParameter = parameterForInteracting(timeID, time, item);
 
-                    switch(useParameter){
+                    switch (useParameter) {
                         case "cut":
                             if (currentPosition.aliveStatus > 0) {
                                 currentPosition.aliveStatus = (currentPosition.aliveStatus * -1) + 1;
@@ -204,33 +200,46 @@ public class IngameObject {
                     int alt = parameterValue("alt");
 
                     if (interactType != 0) {
-                        switch(interactType){
+                        switch (interactType) {
                             case -1:
                             case 1:
-                                if (currentPosition.aliveStatus == 1) { currentPosition.aliveStatus = 2; }
-                                else if (currentPosition.aliveStatus == 2) { currentPosition.aliveStatus = 1; }
+                                if (currentPosition.aliveStatus == 1) {
+                                    currentPosition.aliveStatus = 2;
+                                } else if (currentPosition.aliveStatus == 2) {
+                                    currentPosition.aliveStatus = 1;
+                                }
                                 break;
 
                             case -2:
                             case 2:
-                                if (currentPosition.aliveStatus == 1) { currentPosition.aliveStatus = 2; currentPosition.x += 1;}
-                                else if (currentPosition.aliveStatus == 2) { currentPosition.aliveStatus = 1;  currentPosition.x -= 1;}
+                                if (currentPosition.aliveStatus == 1) {
+                                    currentPosition.aliveStatus = 2;
+                                    currentPosition.x += 1;
+                                } else if (currentPosition.aliveStatus == 2) {
+                                    currentPosition.aliveStatus = 1;
+                                    currentPosition.x -= 1;
+                                }
                                 break;
 
                             case -3:
                             case 3:
-                                if (currentPosition.aliveStatus == 1) { currentPosition.aliveStatus = 2; currentPosition.x -= 1;}
-                                else if (currentPosition.aliveStatus == 2) { currentPosition.aliveStatus = 1;  currentPosition.x += 1;}
+                                if (currentPosition.aliveStatus == 1) {
+                                    currentPosition.aliveStatus = 2;
+                                    currentPosition.x -= 1;
+                                } else if (currentPosition.aliveStatus == 2) {
+                                    currentPosition.aliveStatus = 1;
+                                    currentPosition.x += 1;
+                                }
                                 break;
                         }
 
                         Gdx.app.log("IngameObject", nameID + ": currentPosition.x = " + currentPosition.x);
 
                         Gdx.app.log("IngameObject", nameID + ": definition.interactLinks.size() = " + definition.interactLinks.size());
-                        if (definition.interactLinks.size() > 0){
-                            for (IngameObject link : level.getObjectsWithNameID(timeID, time, definition.interactLinks)){
-                                if (link.parameterValue("alt") == alt){
-                                    link.sendInterrupt(new Interrupt(Interrupt.InterruptID.interact, interrupt.caller), timeID, time);
+                        if (definition.interactLinks.size() > 0) {
+                            for (IngameObject link : level.getObjectsWithNameID(timeID, time, definition.interactLinks)) {
+                                if (link.parameterValue("alt") == alt) {
+                                    link.sendInterrupt(new IngameInterrupt(Interrupt.InterruptID.interact, interrupt.caller), timeID, time);
                                 }
                             }
                         }
@@ -240,15 +249,16 @@ public class IngameObject {
 
                 case setAliveStatus:
                     currentPosition.aliveStatus = interrupt.value;
-                    if (interrupt.targetPos.x >= 0)
-                    {
+                    if (interrupt.targetPos.x >= 0) {
                         currentPosition.x = (int) interrupt.targetPos.x;
                         currentPosition.y = (int) interrupt.targetPos.y;
                     }
                     break;
             }
 
-            interrupts.get(timeID)[time] = null;
+            if (interrupt.caller == null) {
+                interrupts.remove(i);
+            }
         }
 
         return currentPosition;
@@ -278,6 +288,8 @@ public class IngameObject {
 
                 //TODO: Check other parameters and execute accordingly
 
+                Vector2 currentPositionVector = currentPosition.vector2();
+
                 //And now perform any npcAction, if nothing was already done (such as falling)?
                 int numberOfNPCPriorities = definition.npcPriorities.size();
                 if (!automaticAction && definition.npcPriorities.size() > 0){
@@ -287,10 +299,56 @@ public class IngameObject {
                         boolean used = false;
 
                         switch(npcDef.goal){
-                            case moveDirection:
-                                currentPosition.x += npcDef.targetVector.x;
-                                currentPosition.y += npcDef.targetVector.y;
-                                used = true;
+
+                            case huntIfState:
+
+                                //Don't kill if not high enough aliveStatus
+                                if (currentPosition.aliveStatus < npcDef.targetValue){ break; }
+
+                                PlayerObject closest = null;
+                                float closestDist = 0;
+
+                                for (int p = 0; p < level.players.size(); p++) {
+
+                                    PlayerObject tempPlayer = level.players.get(p);
+                                    TimePosition playerTimePos = tempPlayer.getPosition(timeID, time);
+
+                                    if (playerTimePos.y == currentPosition.y && playerTimePos.aliveStatus > 0) {
+
+                                        if (playerTimePos.x == currentPosition.x) {
+                                            level.players.get(p).sendInterrupt(timeID, time, new PlayerInterrupt(0));
+                                            used = true;
+                                            Gdx.app.log("InGameObject", "Kill player!!");
+                                            break;
+                                        }
+                                        else {
+                                            float tempDist = playerTimePos.vector2().dst(currentPositionVector);
+
+                                            if (closest == null || tempDist < closestDist) {
+                                                closestDist = tempDist;
+                                                closest = tempPlayer;
+                                            }
+                                        }
+                                    }
+                                }
+
+                                if (!used && closest != null) {
+
+                                    TimePosition closestPos = closest.getPosition(timeID, time);
+                                    if (closestPos.x < currentPosition.x) {
+                                        currentPosition.x -= 1; //Move down if not already on top of the object
+                                    } else if (closestPos.x > currentPosition.x) {
+                                        currentPosition.x += 1; //Move down if not already on top of the object
+                                    }
+
+                                    if (currentPosition.x == closestPos.x){
+                                        closest.sendInterrupt(timeID, time, new PlayerInterrupt(0));
+                                        Gdx.app.log("InGameObject", "Kill player!!");
+                                    }
+
+                                    used = true;
+                                }
+
                                 break;
 
                             case flyDownTo:
@@ -323,6 +381,29 @@ public class IngameObject {
                                     if (used) { break; }
                                 }
                                 break;
+
+                            case killPlayer:
+
+                                //Don't kill if not high enough aliveStatus
+                                if (currentPosition.aliveStatus < npcDef.targetValue){ break; }
+
+                                for (int p = 0; p < level.players.size(); p++) {
+
+                                    TimePosition playerTimePos = level.players.get(p).getPosition(timeID, time);
+
+                                    if (playerTimePos.x == currentPosition.x && playerTimePos.y == currentPosition.y && playerTimePos.aliveStatus > 0) {
+                                        level.players.get(p).sendInterrupt(timeID, time, new PlayerInterrupt(0));
+                                        used = true;
+                                    }
+                                }
+
+                                break;
+
+                            case moveDirection:
+                                currentPosition.x += npcDef.targetVector.x;
+                                currentPosition.y += npcDef.targetVector.y;
+                                used = true;
+                                break;
                         }
 
                         if (used){ break; }
@@ -332,7 +413,7 @@ public class IngameObject {
             } else {
                 if (connectedObject != null) {
                     Gdx.app.log("IngameObject", nameID + ": sending destroy interrupt");
-                    connectedObject.sendInterrupt(new Interrupt(null, 0), timeID, time);
+                    connectedObject.sendInterrupt(new IngameInterrupt(null, 0), timeID, time);
                 }
             }
 
@@ -360,7 +441,7 @@ public class IngameObject {
         {
             if (parameterValue("connectionAliveLinked") == 1)
             {
-                Interrupt connectionUpdate = new Interrupt(null,
+                IngameInterrupt connectionUpdate = new IngameInterrupt(null,
                                                     new Vector2(currentPosition.x + parameterValue("connectionOffsetX"), currentPosition.y + parameterValue("connectionOffsetY")),
                                                             currentPosition.aliveStatus);
 
@@ -415,10 +496,14 @@ public class IngameObject {
         return false;
     }
 
-    public void sendInterrupt(Interrupt interrupt, TimeID timeID, int time){
-        interrupts.get(timeID)[time] = interrupt;
+    public void sendInterrupt(IngameInterrupt interrupt, TimeID timeID, int time){
+        interrupts.add(0,interrupt);
 
         Gdx.app.log("IngameObject", nameID + ": received " + interrupt.interruptID.toString() + " interrupt at " + timeID.toString() + " " + String.valueOf(time));
+    }
+
+    public void clearInterrupts(){
+        interrupts.clear();
     }
 
     public TimePosition getTimePosition(TimeID timeID, int time){

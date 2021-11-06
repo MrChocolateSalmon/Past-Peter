@@ -36,7 +36,7 @@ public class WinScreen implements Screen, ScreenMethods {
 
         gameData.renderer.renderStart(delta, BackgroundType.sky, displayLevel.getCurrentTimeID());
 
-        gameData.renderer.renderWinScreen(displayLevel);
+        gameData.renderer.renderWinScreen(displayLevel, delta);
 
         gameData.renderer.renderEnd();
 

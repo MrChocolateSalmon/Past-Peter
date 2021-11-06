@@ -1,5 +1,5 @@
 package com.mrchocolatesalmon.pastpeter.enums;
 
 public enum NPCGoal {
-    moveTo, moveDirection, flyDownTo;
+    flyDownTo, huntIfState, killPlayer, moveDirection, moveTo;
 }
