@@ -112,11 +112,22 @@ public class ObjectDef {
         public float targetValue;
         public LinkedList<String> targetNames =  new LinkedList<String>();
 
-        public int minAliveStatus = 0;
+        public int minAliveStatus = 1, maxDist = -1;
+        public boolean sameYAxis = true;
 
         public NPCDef set_moveToTargets(String[] targets){
             goal = NPCGoal.moveTo;
             Collections.addAll(targetNames, targets);
+
+            return this;
+        }
+
+        public NPCDef set_moveToTargets(String[] targets, int maxDist, boolean sameYAxis){
+            goal = NPCGoal.moveTo;
+            Collections.addAll(targetNames, targets);
+
+            this.sameYAxis = sameYAxis;
+            this.maxDist = maxDist;
 
             return this;
         }
@@ -168,5 +179,6 @@ public class ObjectDef {
 // [pickup]     1 = can be picked up if alive
 //              2 = can be picked up with alivestatus == 1
 //              3 = ^ same, but sets alivestatus to 2 when dropped
+//              4 = can be picked up if alive, but sets alivestatus to 2 when dropped
 //
 // [wall] becomes a wall if alive status is larger than or equal to this value

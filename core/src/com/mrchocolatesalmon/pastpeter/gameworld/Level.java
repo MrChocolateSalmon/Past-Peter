@@ -155,7 +155,7 @@ public class Level {
             if (objPos.x == pos.x && objPos.y == pos.y){
                 int pickupParameter = temp.parameterValue("pickup");
 
-                if (pickupParameter == 1 || (pickupParameter >= 2 && pickupParameter <= 3 && objPos.aliveStatus == 1)) {
+                if (pickupParameter == 1 || pickupParameter == 4 ||(pickupParameter >= 2 && pickupParameter <= 3 && objPos.aliveStatus == 1)) {
                     return temp;
                 }
             }

@@ -131,7 +131,7 @@ public class IngameObject {
                 case pickup:
                     int pickupValue = parameterValue("pickup");
 
-                    if (pickupValue == 1 || (pickupValue > 1 && currentPosition.aliveStatus == 1)) {
+                    if (pickupValue == 1 || (pickupValue == 4 && currentPosition.aliveStatus > 0) || (pickupValue < 4 && pickupValue > 1 && currentPosition.aliveStatus == 1)) {
                         interrupt.caller.hold(this, timeID, time); //Confirm pickup with player
                         currentPosition.aliveStatus = 0; //Set alive status to 0 to hide
                     }
@@ -146,7 +146,7 @@ public class IngameObject {
                         currentPosition.x = callerPosition.x;
                         currentPosition.y = callerPosition.y;
 
-                        if (parameterValue("pickup") == 3) {
+                        if (parameterValue("pickup") == 3 || parameterValue("pickup") == 4) {
                             currentPosition.aliveStatus = 2;
                         } else {
                             currentPosition.aliveStatus = 1;
@@ -233,13 +233,12 @@ public class IngameObject {
                                 break;
                         }
 
-                        Gdx.app.log("IngameObject", nameID + ": currentPosition.x = " + currentPosition.x);
-
-                        Gdx.app.log("IngameObject", nameID + ": definition.interactLinks.size() = " + definition.interactLinks.size());
+                        //Gdx.app.log("IngameObject", nameID + ": definition.interactLinks.size() = " + definition.interactLinks.size());
                         if (definition.interactLinks.size() > 0) {
                             for (IngameObject link : level.getObjectsWithNameID(timeID, time, definition.interactLinks)) {
                                 if (link.parameterValue("alt") == alt) {
-                                    link.sendInterrupt(new IngameInterrupt(Interrupt.InterruptID.interact, interrupt.caller), timeID, time);
+                                    //Gdx.app.log("IngameObject", nameID + ": Sending linked interact to " + link.nameID);
+                                    link.sendInterrupt(new IngameInterrupt(Interrupt.InterruptID.interact, null), timeID, time);
                                 }
                             }
                         }
@@ -300,6 +299,37 @@ public class IngameObject {
 
                         switch(npcDef.goal){
 
+                            case flyDownTo:
+                                //TODO: Search through list, and if that object is below, move down to it
+                                int flyx = currentPosition.x;
+                                for (int y = currentPosition.y+1; y < GameData.GAMEHEIGHT; y++){
+
+                                    Vector2 checkPosition = new Vector2(flyx,y);
+
+                                    for (String n : npcDef.targetNames){
+                                        LinkedList<IngameObject> targetsFound = level.getObjects(timeID, time, checkPosition, npcDef.targetNames);
+
+                                        for (int t = targetsFound.size() - 1; t >= 0; t--){
+                                            if (targetsFound.get(t).getTimePosition(timeID, time).aliveStatus < npcDef.minAliveStatus){
+                                                targetsFound.remove(t);
+                                            }
+                                        }
+
+                                        if (targetsFound.size() > 0){
+
+                                            if (y > currentPosition.y + 1){
+                                                currentPosition.y += 1; //Move down if not already on top of the object
+                                            }
+
+                                            used = true;
+                                            break;
+                                        }
+                                    }
+
+                                    if (used) { break; }
+                                }
+                                break;
+
                             case huntIfState:
 
                                 //Don't kill if not high enough aliveStatus
@@ -351,37 +381,6 @@ public class IngameObject {
 
                                 break;
 
-                            case flyDownTo:
-                                //TODO: Search through list, and if that object is below, move down to it
-                                int x = currentPosition.x;
-                                for (int y = currentPosition.y+1; y < GameData.GAMEHEIGHT; y++){
-
-                                    Vector2 checkPosition = new Vector2(x,y);
-
-                                    for (String n : npcDef.targetNames){
-                                        LinkedList<IngameObject> targetsFound = level.getObjects(timeID, time, checkPosition, npcDef.targetNames);
-
-                                        for (int t = targetsFound.size() - 1; t >= 0; t--){
-                                            if (targetsFound.get(t).getTimePosition(timeID, time).aliveStatus < npcDef.minAliveStatus){
-                                                targetsFound.remove(t);
-                                            }
-                                        }
-
-                                        if (targetsFound.size() > 0){
-
-                                            if (y > currentPosition.y + 1){
-                                                currentPosition.y += 1; //Move down if not already on top of the object
-                                            }
-
-                                            used = true;
-                                            break;
-                                        }
-                                    }
-
-                                    if (used) { break; }
-                                }
-                                break;
-
                             case killPlayer:
 
                                 //Don't kill if not high enough aliveStatus
@@ -403,6 +402,49 @@ public class IngameObject {
                                 currentPosition.x += npcDef.targetVector.x;
                                 currentPosition.y += npcDef.targetVector.y;
                                 used = true;
+                                break;
+
+                            case moveTo:
+                                //TODO: Change this to path finding throughout whole leel
+                                int y = currentPosition.y;
+
+                                TimePosition closestObjectPos = null;
+                                float closestObjectDist = 0;
+
+                                for (int movex = 0; movex < GameData.GAMEWIDTH; movex++){
+
+                                    Vector2 checkPosition = new Vector2(movex,y);
+
+                                    for (String n : npcDef.targetNames){
+                                        LinkedList<IngameObject> targetsFound = level.getObjects(timeID, time, checkPosition, npcDef.targetNames);
+
+                                        for (int t = targetsFound.size() - 1; t >= 0; t--){
+
+                                            TimePosition tempObjectPos = targetsFound.get(t).getTimePosition(timeID, time);
+
+                                            if (tempObjectPos.aliveStatus >= npcDef.minAliveStatus){
+                                                float tempDist = tempObjectPos.vector2().dst(currentPositionVector);
+
+                                                if (closestObjectPos == null || tempDist < closestObjectDist) {
+                                                    closestObjectDist = tempDist;
+                                                    closestObjectPos = tempObjectPos;
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+
+                                if (!used && closestObjectPos != null) {
+
+                                    if (closestObjectPos.x < currentPosition.x) {
+                                        currentPosition.x -= 1; //Move down if not already on top of the object
+                                    } else if (closestObjectPos.x > currentPosition.x) {
+                                        currentPosition.x += 1; //Move down if not already on top of the object
+                                    }
+
+                                    used = true;
+                                }
+
                                 break;
                         }
 

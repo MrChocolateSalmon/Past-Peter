@@ -116,7 +116,8 @@ public class GameData {
                                 .NPC(new ObjectDef.NPCDef().set_flyDownTo(new String[] {"leaf"}, 3))
                                 .NPC(new ObjectDef.NPCDef().set_moveDirection(new Vector2(-1, 0))));
 
-        objectDefinitions.put("carrot", new ObjectDef().Parameter("pickup", 1));
+        objectDefinitions.put("carrot", new ObjectDef().Parameter("pickup", 4)
+                                .Animation(1, "carrot_down").Animation(2, "carrot_up"));
 
         objectDefinitions.put("churchcross", new ObjectDef());
 
@@ -152,7 +153,8 @@ public class GameData {
         objectDefinitions.put("paradoxplatform", new ObjectDef().Parameter("wall",1));
         objectDefinitions.put("pressureplate", new ObjectDef().Animation(1, "pressureplate"));
 
-        objectDefinitions.put("rabbit", new ObjectDef().Parameter("gravity",1).Parameter("npc",1).Animation(1, "rabbit"));
+        objectDefinitions.put("rabbit", new ObjectDef().Parameter("gravity",1).Parameter("npc",1).Animation(1, "rabbit")
+                                .NPC(new ObjectDef.NPCDef().set_moveToTargets(new String[] {"carrot"}, 5, true)));
 
         objectDefinitions.put("seed", new ObjectDef().Parameter("pickup",3).Parameter("wall",3).Parameter("grow_state", 2).
                                 Animation(1, "seed").Animation(-2, "tree_cut").Animation(2, "shrub").
