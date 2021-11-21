@@ -109,7 +109,7 @@ public class IngameObject {
 
         String animName = textureMap.get(position.aliveStatus);
 
-        if (animName != null) {
+        if (animName != null && !animName.equals("")) {
             Animation anim = AssetLoader.getIngameTexture(animName);
 
             //Gdx.app.log("IngameObject", nameID);
@@ -122,6 +122,8 @@ public class IngameObject {
 
     TimePosition ProcessInterrupts(TimePosition currentPosition, TimeID timeID, int time)
     {
+        Vector2 positionVector = currentPosition.vector2();
+
         for (int i = interrupts.size() - 1; i >= 0; i--){
 
             IngameInterrupt interrupt = interrupts.get(0);
@@ -157,8 +159,8 @@ public class IngameObject {
                 case use:
 
                     //Gdx.app.log("IngameObject", nameID + ": use interrupt");
-                    Vector2 pos = new Vector2(interrupt.targetPos.x, interrupt.targetPos.y);
-                    LinkedList<IngameObject> objs = level.getObjectsAt(timeID, time, pos);
+                    Vector2 pos = new Vector2(interrupt.targetPos.x + positionVector.x, interrupt.targetPos.y + positionVector.y);
+                    LinkedList<IngameObject> objs = level.getObjectsAt(timeID, time, pos, this);
 
                     AtomicReference<String> parameterName = new AtomicReference<String>();
 
@@ -269,6 +271,7 @@ public class IngameObject {
         TimePosition[] earlierTimePositions = positionArray.get(previousTimeID);
 
         TimePosition currentPosition = currentPositions[time];
+        Vector2 currentPositionVector = currentPosition.vector2();
 
         if (time > 0){
 
@@ -285,9 +288,53 @@ public class IngameObject {
 
                 //IngameObject wallBelow = level.findGameobjectWithParameter("wall", new Vector2(currentPosition.x, currentPosition.y+1), timeID, time);
 
-                //TODO: Check other parameters and execute accordingly
+                int alt = parameterValue("alt");
+                int interactType = parameterValue("interact");
+                int fragileType = parameterValue("fragile");
 
-                Vector2 currentPositionVector = currentPosition.vector2();
+                if (fragileType == 1) {
+                    Vector2 positionAbove = new Vector2(currentPosition.x, currentPosition.y - 1);
+                    PlayerObject standingPlayer = level.getPlayerAt(timeID, time, positionAbove);
+
+                    if (standingPlayer != null) {
+                        boolean playerHoldingItem = standingPlayer.getHolding(timeID, time) != null;
+
+                        currentPosition.aliveStatus -= playerHoldingItem ? 2 : 1;
+                    }
+                }
+
+                if (interactType == 4 || interactType == -4) {
+                    IngameObject standingObj = level.getObjectWithParameterEqualTo("pickup", 0, currentPositionVector, timeID, time, this);
+                    PlayerObject standingPlayer = null;
+
+                    if (standingObj == null) {
+                        standingPlayer = level.getPlayerAt(timeID, time, currentPositionVector);
+                    }
+
+                    if (currentPosition.aliveStatus == 1 && (standingObj != null || standingPlayer != null)) {
+                        currentPosition.aliveStatus = 2;
+
+                        if (definition.interactLinks.size() > 0) {
+                            for (IngameObject link : level.getObjectsWithNameID(timeID, time, definition.interactLinks)) {
+                                if (link.parameterValue("alt") == alt) {
+                                    link.sendInterrupt(new IngameInterrupt(null, 1), timeID, time);
+                                }
+                            }
+                        }
+                    } else if (currentPosition.aliveStatus == 2 && standingObj == null && standingPlayer == null) {
+                        currentPosition.aliveStatus = 1;
+
+                        if (definition.interactLinks.size() > 0) {
+                            for (IngameObject link : level.getObjectsWithNameID(timeID, time, definition.interactLinks)) {
+                                if (link.parameterValue("alt") == alt) {
+                                    link.sendInterrupt(new IngameInterrupt(null, 2), timeID, time);
+                                }
+                            }
+                        }
+                    }
+                }
+
+
 
                 //And now perform any npcAction, if nothing was already done (such as falling)?
                 int numberOfNPCPriorities = definition.npcPriorities.size();
@@ -503,7 +550,7 @@ public class IngameObject {
         TimePosition[] currentPositions = positionArray.get(timeID);
         TimePosition currentPosition = currentPositions[time];
 
-        LinkedList<IngameObject> objs = level.getObjectsAt(timeID, time, pos);
+        LinkedList<IngameObject> objs = level.getObjectsAt(timeID, time, pos, this);
 
         if (objectToUseOn(timeID, time, pos, objs, null) != null) { return true; }
 

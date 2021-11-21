@@ -132,11 +132,13 @@ public class Level {
         return null;
     }
 
-    public IngameObject getObjectWithParameterEqualTo(String parameter, int requiredValue, Vector2 pos, TimeID timeID, int time){
+    public IngameObject getObjectWithParameterEqualTo(String parameter, int requiredValue, Vector2 pos, TimeID timeID, int time, IngameObject exclude){
 
         for (int i = 0; i < objects.size(); i++){
             IngameObject temp = objects.get(i);
             TimePosition objPos = temp.getTimePosition(timeID,time);
+
+            if (temp == exclude){ continue; }
 
             if (objPos.x == pos.x && objPos.y == pos.y && temp.parameterValue(parameter) == requiredValue){
                 return temp;
@@ -144,6 +146,11 @@ public class Level {
         }
 
         return null;
+    }
+
+    public IngameObject getObjectWithParameterEqualTo(String parameter, int requiredValue, Vector2 pos, TimeID timeID, int time){
+
+        return getObjectWithParameterEqualTo(parameter, requiredValue, pos, timeID, time, null);
     }
 
     public IngameObject getPickupObject(Vector2 pos, TimeID timeID, int time){
@@ -170,11 +177,13 @@ public class Level {
 
     public BackgroundType GetBackground(){ return backType; }
 
-    public LinkedList<IngameObject> getObjects(TimeID timeID, int time, Vector2 pos, LinkedList<String> names) {
+    public LinkedList<IngameObject> getObjects(TimeID timeID, int time, Vector2 pos, LinkedList<String> names, IngameObject exclude) {
         LinkedList<IngameObject> objs = new LinkedList<IngameObject>();
 
         for (int i = 0; i < objects.size(); i++){
             IngameObject obj = objects.get(i);
+
+            if (obj == exclude){ continue; }
 
             TimePosition timePos = obj.getTimePosition(timeID, time);
 
@@ -201,11 +210,30 @@ public class Level {
         return objs;
     }
 
-    public LinkedList<IngameObject> getObjectsAt(TimeID timeID, int time, Vector2 pos) {
-        return getObjects(timeID, time, pos, null);
+    public LinkedList<IngameObject> getObjects(TimeID timeID, int time, Vector2 pos, LinkedList<String> names) {
+        return getObjects(timeID, time, pos, names, null);
+    }
+
+    public LinkedList<IngameObject> getObjectsAt(TimeID timeID, int time, Vector2 pos, IngameObject exclude) {
+        return getObjects(timeID, time, pos, null, exclude);
     }
 
     public LinkedList<IngameObject> getObjectsWithNameID(TimeID timeID, int time, LinkedList<String> names) {
         return getObjects(timeID, time, null, names);
+    }
+
+    public PlayerObject getPlayerAt(TimeID timeID, int time, Vector2 pos) {
+
+        for (int i = 0; i < players.size(); i++){
+            PlayerObject player = players.get(i);
+
+            TimePosition timePos = player.getPosition(timeID, time);
+
+            if (pos == null || timePos.x == pos.x && timePos.y == pos.y){
+                return player;
+            }
+        }
+
+        return null;
     }
 }

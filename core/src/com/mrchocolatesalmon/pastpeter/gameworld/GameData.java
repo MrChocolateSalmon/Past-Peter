@@ -127,8 +127,8 @@ public class GameData {
 
         objectDefinitions.put("door", new ObjectDef().Parameter("wall",1));
 
-        objectDefinitions.put("fragilestone", new ObjectDef().Parameter("wall",1).Animation(1, "fragilestone1")
-                                .Animation(2, "fragilestone2"));
+        objectDefinitions.put("fragilestone", new ObjectDef().Parameter("wall",1).Parameter("fragile",1)
+                                .Animation(1, "fragilestone1").Animation(2, "fragilestone2"));
 
         objectDefinitions.put("grass", new ObjectDef().Parameter("wall",1)
                                     .Animation(1, "grass"));
@@ -143,7 +143,8 @@ public class GameData {
                             .Animation(2, "lever_brown_on",  0).Animation(2, "lever_yellow_on",  1));
         objectDefinitions.put("leaf", new ObjectDef().Parameter("wall",3).AnimationRange(3, 6, "leaf"));
 
-        objectDefinitions.put("openstone", new ObjectDef().Parameter("wall",1));
+        objectDefinitions.put("openstone", new ObjectDef().Parameter("wall",2).Parameter("start_state", 2)
+                                .Animation(1, "openstoneopen").Animation(2, "openstoneclosed"));
 
         objectDefinitions.put("platform", new ObjectDef().Parameter("wall",1).Parameter("interact", -2)
                                 .AnimationRange(1,2, "platform_brown", 0).AnimationRange(1, 2, "platform_yellow", 1));
@@ -151,7 +152,8 @@ public class GameData {
         objectDefinitions.put("paradoxlever", new ObjectDef().Parameter("interact",1));
 
         objectDefinitions.put("paradoxplatform", new ObjectDef().Parameter("wall",1));
-        objectDefinitions.put("pressureplate", new ObjectDef().Animation(1, "pressureplate"));
+        objectDefinitions.put("pressureplate", new ObjectDef().Parameter("interact",-4).InteractLink("openstone")
+                                .Animation(1, "pressureplate").Animation(2, ""));
 
         objectDefinitions.put("rabbit", new ObjectDef().Parameter("gravity",1).Parameter("npc",1).Animation(1, "rabbit")
                                 .NPC(new ObjectDef.NPCDef().set_moveToTargets(new String[] {"carrot"}, 5, true)));

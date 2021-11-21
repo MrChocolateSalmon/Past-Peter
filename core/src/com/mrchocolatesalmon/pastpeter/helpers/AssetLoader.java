@@ -95,6 +95,8 @@ public class AssetLoader {
         objectTextureMap.put("stone", makeAnimation(objectTexture,              5, 1, 1, 0f, PlayMode.NORMAL));
         objectTextureMap.put("fragilestone2", makeAnimation(objectTexture,      5, 2, 1, 0f, PlayMode.NORMAL));
         objectTextureMap.put("fragilestone1", makeAnimation(objectTexture,      5, 3, 1, 0f, PlayMode.NORMAL));
+        objectTextureMap.put("openstoneclosed", makeAnimation(objectTexture,    5, 4, 1, 0f, PlayMode.NORMAL));
+        objectTextureMap.put("openstoneopen", makeAnimation(objectTexture,      5, 5, 1, 0f, PlayMode.NORMAL));
         objectTextureMap.put("pressureplate", makeAnimation(objectTexture,      5, 7, 1, 0f, PlayMode.NORMAL));
         objectTextureMap.put("grass", makeAnimation(objectTexture,              6, 1, 1, 0f, PlayMode.NORMAL));
         objectTextureMap.put("dog_idle", makeAnimation(objectTexture,         7, 1, 1, 0f, PlayMode.NORMAL));

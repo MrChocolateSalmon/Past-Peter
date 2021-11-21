@@ -168,6 +168,8 @@ public class ObjectDef {
 //              2 = can be cut,
 //              3 = can both cut and be cut
 //
+// [fragile]    1 = reduces alive status by 1 when a player is standing above (by 2 if player is holding something)
+//
 // [grow_state] 1 = increments alive_status by 1 each age
 //              2 = ^ same, but only if alive_status >= 2
 //
@@ -175,6 +177,7 @@ public class ObjectDef {
 //              1 = cycle between alive state 1 & 2
 //              2 = ^ same, but alternates moving right & left
 //              3 = ^ same, but alternates moving left & right
+//              4 = Sets alive state to 2 when something (pickup=0) is on the same square & alive state is 1. Player interactions sets alive state +2.
 //
 // [pickup]     1 = can be picked up if alive
 //              2 = can be picked up with alivestatus == 1

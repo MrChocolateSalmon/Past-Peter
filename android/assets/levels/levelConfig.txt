@@ -3,4 +3,6 @@ peter
 theSeed
 future
 herVoice
+mountain
+paige
 ability
