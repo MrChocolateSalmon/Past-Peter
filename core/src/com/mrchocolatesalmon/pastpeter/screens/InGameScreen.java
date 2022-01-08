@@ -341,11 +341,12 @@ public class InGameScreen implements Screen, ScreenMethods {
             IngameObject ladderBelow = currentLevel.getObjectWithParameter("ladder", new Vector2(playerPosition.x, playerPosition.y + 1), currentTimeID, currentTime);
 
             boolean inAir = !activePlayer.checkCollision(new Vector2(playerPosition.x, playerPosition.y + 1), currentTimeID, currentTime) && ladderBelow == null;
+            boolean atRoof = activePlayer.checkCollision(new Vector2(playerPosition.x, playerPosition.y - 1), currentTimeID, currentTime);
 
             playerCanMoveLeft = !inAir && !activePlayer.checkCollision(new Vector2(playerPosition.x - 1, playerPosition.y), currentTimeID, currentTime);
             playerCanMoveRight = !inAir && !activePlayer.checkCollision(new Vector2(playerPosition.x + 1, playerPosition.y), currentTimeID, currentTime);
             playerCanMoveDown = inAir || ladderBelow != null;
-            playerCanMoveUp = ladderHere != null;
+            playerCanMoveUp = ladderHere != null && !atRoof;
             playerCanInteract = interactable != null;
             playerCanPickup = currentlyHolding == null && potentialHolding != null;
             playerCanDrop = currentlyHolding != null && potentialHolding == null;

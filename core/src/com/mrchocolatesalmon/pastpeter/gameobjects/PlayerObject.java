@@ -215,8 +215,20 @@ public class PlayerObject {
                     command.commandID = CommandInfo.CommandID.wait;
                 }
 
+                IngameObject ladderHere = level.getObjectWithParameter("ladder", currentPosition.vector2(), timeID, time);
+                IngameObject ladderBelow = level.getObjectWithParameter("ladder", new Vector2(currentPosition.x, currentPosition.y + 1), timeID, time);
+
+                boolean inAir = !checkCollision(new Vector2(currentPosition.x, currentPosition.y + 1), timeID, time) && ladderBelow == null;
+
                 switch (command.commandID) {
                     case wait:
+                        if (inAir && ladderHere == null){
+                            currentPosition.y += 1;
+                            if (currentMoment) {
+                                animationBacklog.add(new AnimationCommand(previousPosition.vector2(), AnimationCommand.TransitionType.lerp, textureMap.get(timeID).get("idle")));
+                                animationBacklog.add(new AnimationCommand(currentPosition.vector2(), AnimationCommand.TransitionType.none, textureMap.get(timeID).get("idle")));
+                            }
+                        }
                         break;
                     case move:
                         currentPosition.x += (int) command.pos.x;
