@@ -19,7 +19,7 @@ public class AssetLoader {
     private static Texture objectTexture;
     private static HashMap<String, Animation> objectTextureMap;
 
-    private static Texture peterTexture;
+    private static Texture peterTexture, paigeTexture;
     private static HashMap<String, Animation> playerTextureMap;
 
     public static void load() {
@@ -113,7 +113,8 @@ public class AssetLoader {
 
         playerTextureMap = new HashMap<String, Animation>();
 
-        peterTexture = new Texture(Gdx.files.internal("data/playertexture.png"));
+        // Peter
+        peterTexture = new Texture(Gdx.files.internal("data/petertexture.png"));
         peterTexture.setFilter(TextureFilter.Nearest, TextureFilter.Nearest);
 
         playerTextureMap.put("peter_past_idle", makeAnimation(peterTexture, 0, 1, 1, 0.2f, PlayMode.LOOP));
@@ -123,6 +124,16 @@ public class AssetLoader {
         playerTextureMap.put("peter_past_endpoint", makeAnimation(peterTexture, 0, 4, 1, 0.2f, PlayMode.LOOP));
         playerTextureMap.put("peter_present_endpoint", makeAnimation(peterTexture, 1, 4, 1, 0.2f, PlayMode.LOOP));
         playerTextureMap.put("peter_future_endpoint", makeAnimation(peterTexture, 2, 4, 1, 0.2f, PlayMode.LOOP));
+
+        // Paige
+        paigeTexture = new Texture(Gdx.files.internal("data/paigetexture.png"));
+        paigeTexture.setFilter(TextureFilter.Nearest, TextureFilter.Nearest);
+
+        playerTextureMap.put("paige_past_idle", makeAnimation(paigeTexture, 6, 1, 1, 0.2f, PlayMode.LOOP));
+        playerTextureMap.put("paige_present_idle", makeAnimation(paigeTexture, 7, 1, 1, 0.2f, PlayMode.LOOP));
+
+        playerTextureMap.put("paige_past_endpoint", makeAnimation(paigeTexture, 6, 4, 1, 0.2f, PlayMode.LOOP));
+        playerTextureMap.put("paige_present_endpoint", makeAnimation(paigeTexture, 7, 4, 1, 0.2f, PlayMode.LOOP));
     }
 
     private static Animation makeAnimation(Texture tex, int y, int startX, int count, float speed, PlayMode playMode) {

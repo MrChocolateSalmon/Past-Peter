@@ -88,6 +88,9 @@ public class InGameScreen implements Screen, ScreenMethods {
             usingItem = null;
             decrementTime();
             renderFlush(currentLevel.getCurrentTimeID(), true); //Snap everything back
+        } else if (gameData.inputs.keysPressed[Input.Keys.TAB]){
+            activePlayer = currentLevel.setActivePlayer(currentLevel.activePlayerNumber + 1);
+            checkPlayerOptions();
         }
 
         if (playerPosition.aliveStatus > 0){
@@ -302,10 +305,11 @@ public class InGameScreen implements Screen, ScreenMethods {
     }
 
     private void setCurrentTimeID(TimeID timeID){
-        usingItem = null;
-        currentLevel.setCurrentTimeID(timeID);
-        renderFlush(timeID, false);
-        sceneUpdate();
+        if (currentLevel.setCurrentTimeID(timeID)) {
+            usingItem = null;
+            renderFlush(timeID, false);
+            sceneUpdate();
+        }
     }
 
     private void renderFlush(TimeID timeID, boolean fullFlush){

@@ -173,11 +173,12 @@ public class ObjectDef {
 // [grow_state] 1 = increments alive_status by 1 each age
 //              2 = ^ same, but only if alive_status >= 2
 //
-// [interact]   Negative values are the same, but can't be interacted with by the player
+// [interact]   !! Negative values are the same, but can't be interacted with by the player !!
 //              1 = cycle between alive state 1 & 2
 //              2 = ^ same, but alternates moving right & left
 //              3 = ^ same, but alternates moving left & right
 //              4 = Sets alive state to 2 when something (pickup=0) is on the same square & alive state is 1. Player interactions sets alive state +2.
+//              5 = ^ same, but only resets "interact link" if all identical objects have alive state == 1
 //
 // [pickup]     1 = can be picked up if alive
 //              2 = can be picked up with alivestatus == 1

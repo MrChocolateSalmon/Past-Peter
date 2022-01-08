@@ -142,7 +142,9 @@ public class LevelConfig {
                             Vector2 endFuturePosition = new Vector2(Integer.parseInt(endFuturePositionS[0]),Integer.parseInt(endFuturePositionS[1]));
 
                             if (name.equals("peter")){
-                                newLevel.players.add(new Peter(pastPosition, presentPosition, futurePosition, endFuturePosition, PlayerID.peter, newLevel));
+                                newLevel.players.add(new Peter(pastPosition, presentPosition, futurePosition, endFuturePosition, newLevel));
+                            } else if (name.equals("paige")){
+                                newLevel.players.add(new Paige(pastPosition, presentPosition, futurePosition, newLevel));
                             }
 
 

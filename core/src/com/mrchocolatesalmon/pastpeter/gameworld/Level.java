@@ -71,11 +71,19 @@ public class Level {
         return players.get(activePlayerNumber);
     }
 
+    public PlayerObject setActivePlayer(int newPlayerNumber) {
+        activePlayerNumber = newPlayerNumber % players.size();
+        return getActivePlayer();
+    }
+
     public TimeID getCurrentTimeID(){ return currentTimeID; }
-    public void setCurrentTimeID(TimeID timeID){
+    public boolean setCurrentTimeID(TimeID timeID){
         if (timeAvailable.get(timeID)){
             currentTimeID = timeID;
+            return true;
         }
+
+        return false;
     }
 
     public void incrementTime(TimeID timeID){
@@ -187,7 +195,7 @@ public class Level {
 
             TimePosition timePos = obj.getTimePosition(timeID, time);
 
-            if (pos == null || timePos.x == pos.x && timePos.y == pos.y){
+            if (pos == null || (timePos.x == pos.x && timePos.y == pos.y)){
 
                 boolean found = false;
 

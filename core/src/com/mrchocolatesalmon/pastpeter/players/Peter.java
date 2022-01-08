@@ -8,8 +8,8 @@ import com.mrchocolatesalmon.pastpeter.gameworld.Level;
 
 public class Peter extends PlayerObject {
 
-    public Peter(Vector2 startPast, Vector2 startPresent, Vector2 startFuture, Vector2 endFuture, PlayerID id, Level level) {
-        super(startPast, startPresent, startFuture, endFuture, id, level);
+    public Peter(Vector2 startPast, Vector2 startPresent, Vector2 startFuture, Vector2 endFuture, Level level) {
+        super(startPast, startPresent, startFuture, endFuture, PlayerID.peter, level);
 
         textureMap.get(TimeID.past).put("idle", "peter_past_idle");
         textureMap.get(TimeID.present).put("idle", "peter_present_idle");

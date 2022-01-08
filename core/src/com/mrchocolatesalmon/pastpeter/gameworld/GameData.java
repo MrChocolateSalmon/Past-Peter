@@ -152,7 +152,7 @@ public class GameData {
         objectDefinitions.put("paradoxlever", new ObjectDef().Parameter("interact",1));
 
         objectDefinitions.put("paradoxplatform", new ObjectDef().Parameter("wall",1));
-        objectDefinitions.put("pressureplate", new ObjectDef().Parameter("interact",-4).InteractLink("openstone")
+        objectDefinitions.put("pressureplate", new ObjectDef().Parameter("interact",-5).InteractLink("openstone")
                                 .Animation(1, "pressureplate").Animation(2, ""));
 
         objectDefinitions.put("rabbit", new ObjectDef().Parameter("gravity",1).Parameter("npc",1).Animation(1, "rabbit")

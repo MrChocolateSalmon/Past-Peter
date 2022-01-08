@@ -303,7 +303,7 @@ public class IngameObject {
                     }
                 }
 
-                if (interactType == 4 || interactType == -4) {
+                if (interactType == 4 || interactType == -4 || interactType == 5 || interactType == -5) {
                     IngameObject standingObj = level.getObjectWithParameterEqualTo("pickup", 0, currentPositionVector, timeID, time, this);
                     PlayerObject standingPlayer = null;
 
@@ -315,6 +315,7 @@ public class IngameObject {
                         currentPosition.aliveStatus = 2;
 
                         if (definition.interactLinks.size() > 0) {
+
                             for (IngameObject link : level.getObjectsWithNameID(timeID, time, definition.interactLinks)) {
                                 if (link.parameterValue("alt") == alt) {
                                     link.sendInterrupt(new IngameInterrupt(null, 1), timeID, time);
@@ -324,10 +325,31 @@ public class IngameObject {
                     } else if (currentPosition.aliveStatus == 2 && standingObj == null && standingPlayer == null) {
                         currentPosition.aliveStatus = 1;
 
-                        if (definition.interactLinks.size() > 0) {
-                            for (IngameObject link : level.getObjectsWithNameID(timeID, time, definition.interactLinks)) {
-                                if (link.parameterValue("alt") == alt) {
-                                    link.sendInterrupt(new IngameInterrupt(null, 2), timeID, time);
+                        boolean canResetLink = true;
+
+                        if (interactType == 5 || interactType == -5)
+                        {
+                            LinkedList<String> nameIdAsList = new LinkedList<String>();
+                            nameIdAsList.add(this.nameID);
+                            LinkedList<IngameObject> similarObjs = level.getObjects(timeID, time, null, nameIdAsList, null);
+
+                            Gdx.app.log("IngameObject", "similarObjs.size() = " + similarObjs.size());
+
+                            for (int i = 0; i < similarObjs.size(); i++)
+                            {
+                                if (similarObjs.get(i).getTimePosition(timeID, time).aliveStatus > 1)
+                                {
+                                    canResetLink = false;
+                                }
+                            }
+                        }
+
+                        if (canResetLink) {
+                            if (definition.interactLinks.size() > 0) {
+                                for (IngameObject link : level.getObjectsWithNameID(timeID, time, definition.interactLinks)) {
+                                    if (link.parameterValue("alt") == alt) {
+                                        link.sendInterrupt(new IngameInterrupt(null, 2), timeID, time);
+                                    }
                                 }
                             }
                         }
